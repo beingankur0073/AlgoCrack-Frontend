@@ -1,13 +1,7 @@
 import { useEffect, useState } from "react";
+import sampleProblems from "../constants/sampleQuestion.js";
 
-// Sample mock data (replace with API data later)
-const sampleProblems = [
-  { id: 1, title: "Two Sum", difficulty: "Easy" },
-  { id: 2, title: "Add Two Numbers", difficulty: "Medium" },
-  { id: 3, title: "Longest Substring Without Repeating Characters", difficulty: "Medium" },
-  { id: 4, title: "Median of Two Sorted Arrays", difficulty: "Hard" },
-  { id: 5, title: "Reverse Integer", difficulty: "Easy" },
-];
+
 
 const Main = () => {
     const [problems, setProblems] = useState([]);
@@ -17,40 +11,48 @@ const Main = () => {
         setProblems(sampleProblems);
     }, []);
 
-    return (
-        <div className="min-h-screen bg-gray-950 text-white px-4 py-10 flex justify-center">
-            <div className="w-full max-w-4xl">
-                <h1 className="text-4xl font-bold mb-6 text-center text-blue-400">AlgoCrack Questions</h1>
+   return (
+  <div className="min-h-screen bg-gray-950 text-white px-4 py-10 flex justify-center">
+    <div className="w-full max-w-4xl">
+      {/* Fixed Title */}
+      <h1 className="text-4xl font-bold mb-6 text-center text-blue-400 sticky top-0 bg-gray-950 z-20 py-2">
+        AlgoCrack Questions
+      </h1>
 
-                <div className="bg-gray-900 rounded-xl shadow-md overflow-hidden">
-                    <table className="w-full table-auto text-left">
-                        <thead className="bg-gray-800 border-b border-gray-700">
-                            <tr>
-                                <th className="p-4">#</th>
-                                <th className="p-4">Title</th>
-                                <th className="p-4">Difficulty</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {problems.map((problem, index) => (
-                                <tr
-                                    key={problem.id}
-                                    className="hover:bg-gray-800 border-b border-gray-800 cursor-pointer"
-                                    onClick={() => window.location.href = `/problems/${problem.id}`}
-                                >
-                                    <td className="p-4">{index + 1}</td>
-                                    <td className="p-4 text-blue-300 hover:underline">{problem.title}</td>
-                                    <td className={`p-4 font-semibold ${getColor(problem.difficulty)}`}>
-                                        {problem.difficulty}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+      <div className="bg-gray-900 rounded-xl shadow-md overflow-hidden">
+        {/* Scrollable container for table body only */}
+        <div className="max-h-[70vh] overflow-y-auto">
+          <table className="w-full table-auto text-left">
+            {/* Sticky table head */}
+            <thead className="bg-gray-800 border-b border-gray-700 sticky top-0 z-10">
+              <tr>
+                <th className="p-4">#</th>
+                <th className="p-4">Title</th>
+                <th className="p-4">Difficulty</th>
+              </tr>
+            </thead>
+            <tbody>
+              {problems.map((problem, index) => (
+                <tr
+                  key={problem.id}
+                  className="hover:bg-gray-800 border-b border-gray-800 cursor-pointer"
+                  onClick={() => window.location.href = `/problems/${problem.id}`}
+                >
+                  <td className="p-4">{index + 1}</td>
+                  <td className="p-4 text-blue-300 hover:underline">{problem.title}</td>
+                  <td className={`p-4 font-semibold ${getColor(problem.difficulty)}`}>
+                    {problem.difficulty}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-    );
+      </div>
+    </div>
+  </div>
+);
+
 };
 
 // Utility to get Tailwind color for difficulty
