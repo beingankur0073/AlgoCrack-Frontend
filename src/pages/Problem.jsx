@@ -1,20 +1,19 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import Editor from "@monaco-editor/react";
-import sampleProblems from "../constants/sampleQuestion.js"; // ✅ Import list
+import sampleProblems from "../constants/sampleQuestion.js";
 import CodeEditor from "../components/CodeEditor.jsx";
 
 const Problem = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [code, setCode] = useState("// Write your code here");
     const [output, setOutput] = useState("");
-    const [problem, setProblem] = useState(null); // ✅ state for loaded problem
+    const [problem, setProblem] = useState(null);
     const [language, setLanguage] = useState("javascript");
 
     useEffect(() => {
-        // Simulate API call to fetch problem by id
-        const found = sampleProblems.find((p) => p.id === parseInt(id));      
-        setProblem(found);  
+        const found = sampleProblems.find((p) => p.id === parseInt(id));
+        setProblem(found);
         if (found) {
             setCode(found.functionSignature || "// Write your code here");
         }
@@ -22,7 +21,13 @@ const Problem = () => {
 
     const handleRun = () => {
         console.log("Running code:", code);
-        setOutput("Mock output: [0, 1]"); // Replace with actual API result later
+        setOutput("Mock output: [0, 1]");
+    };
+
+    const handleLogout = () => {
+        // TODO: Add logout logic (e.g., clear tokens, redirect)
+        alert("Logging out...");
+        navigate("/login");
     };
 
     if (!problem) {
@@ -34,8 +39,25 @@ const Problem = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-950 text-white px-4 py-6 ">
-            <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 mt-9">
+        <div className="min-h-screen bg-gray-950 text-white px-4 py-6">
+            {/* Top Bar */}
+            <div className="max-w-6xl mx-auto flex justify-between items-center mb-6">
+                <button
+                    onClick={() => navigate(-1)}
+                    className="text-blue-400 hover:underline"
+                >
+                    ← Back
+                </button>
+                <button
+                    onClick={handleLogout}
+                    className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md text-white"
+                >
+                    Logout
+                </button>
+            </div>
+
+            {/* Main Content */}
+            <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
                 {/* Problem description */}
                 <div className="bg-gray-900 p-6 rounded-xl shadow-md overflow-auto">
                     <h2 className="text-3xl font-bold mb-4">{problem.title}</h2>
@@ -62,16 +84,14 @@ const Problem = () => {
                 </div>
 
                 {/* Code editor and output */}
-                    <CodeEditor
+                <CodeEditor
                     code={code}
                     setCode={setCode}
                     handleRun={handleRun}
                     output={output}
                     language={language}
                     setLanguage={setLanguage}
-                    />
-
-
+                />
             </div>
         </div>
     );

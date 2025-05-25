@@ -53,9 +53,11 @@ const sampleProblems = [
     title: "Merge Two Sorted Lists",
     difficulty: "Easy",
     description:
-      "You are given the heads of two sorted linked lists. Merge the two lists in a sorted manner and return the merged list.",
+      "You are given the heads of two sorted linked lists list1 and list2.Merge the two lists into one sorted list. The list should be made by splicing together the nodes of the first two lists.Return the head of the merged linked list.",
     examples: [
       { input: "l1 = [1,2,4], l2 = [1,3,4]", output: "[1,1,2,3,4,4]" },
+      { input: "l1 = [], l2 = []", output: "[]" },
+      { input: "l1 = [], l2 = [0]", output: "[0]" },
     ],
     constraints: [
       "The number of nodes in both lists is in the range [0, 50]",
@@ -315,6 +317,162 @@ const sampleProblems = [
       "0 <= amount <= 10⁴",
     ],
     functionSignature: "function coinChange(coins, amount) { }",
+  },
+  {
+    id: 21,
+    title: "Find Peak Element",
+    difficulty: "Medium",
+    description:
+      "A peak element is an element that is strictly greater than its neighbors. Given an input array `nums`, return the index of any one of its peak elements.",
+    examples: [
+      { input: "nums = [1,2,3,1]", output: "2" },
+    ],
+    constraints: [
+      "1 <= nums.length <= 1000",
+      "-2³¹ <= nums[i] <= 2³¹ - 1",
+    ],
+    functionSignature: "function findPeakElement(nums) { }",
+  },
+  {
+    id: 22,
+    title: "Course Schedule",
+    difficulty: "Medium",
+    description:
+      "There are a total of `numCourses` courses you have to take, labeled from 0 to numCourses-1. Some courses may have prerequisites. Determine if it is possible to finish all courses.",
+    examples: [
+      { input: "numCourses = 2, prerequisites = [[1,0]]", output: "true" },
+    ],
+    constraints: [
+      "1 <= numCourses <= 2000",
+      "0 <= prerequisites.length <= 5000",
+    ],
+    functionSignature: "function canFinish(numCourses, prerequisites) { }",
+  },
+  {
+    id: 23,
+    title: "Top K Frequent Elements",
+    difficulty: "Medium",
+    description:
+      "Given a non-empty array of integers, return the k most frequent elements.",
+    examples: [
+      { input: "nums = [1,1,1,2,2,3], k = 2", output: "[1,2]" },
+    ],
+    constraints: [
+      "1 <= nums.length <= 10⁵",
+      "k is in the range [1, the number of unique elements]",
+    ],
+    functionSignature: "function topKFrequent(nums, k) { }",
+  },
+  {
+    id: 24,
+    title: "LRU Cache",
+    difficulty: "Medium",
+    description:
+      "Design a data structure that follows the constraints of a Least Recently Used (LRU) cache.",
+    examples: [
+      { input: "LRUCache(2), put(1,1), put(2,2), get(1), put(3,3), get(2)", output: "1, -1" },
+    ],
+    constraints: [
+      "1 <= capacity <= 3000",
+    ],
+    functionSignature: "class LRUCache { constructor(capacity) { } get(key) { } put(key, value) { } }",
+  },
+  {
+    id: 25,
+    title: "Find Minimum in Rotated Sorted Array",
+    difficulty: "Medium",
+    description:
+      "Suppose an array of length n sorted in ascending order is rotated between 1 and n times. Find the minimum element.",
+    examples: [
+      { input: "nums = [3,4,5,1,2]", output: "1" },
+    ],
+    constraints: [
+      "n == nums.length",
+      "1 <= n <= 5000",
+    ],
+    functionSignature: "function findMin(nums) { }",
+  },
+  {
+    id: 26,
+    title: "Kth Largest Element in an Array",
+    difficulty: "Medium",
+    description:
+      "Find the kth largest element in an unsorted array. Note that it is the kth largest element in the sorted order, not the kth distinct element.",
+    examples: [
+      { input: "nums = [3,2,1,5,6,4], k = 2", output: "5" },
+    ],
+    constraints: [
+      "1 <= k <= nums.length <= 10⁴",
+    ],
+    functionSignature: "function findKthLargest(nums, k) { }",
+  },
+  {
+    id: 27,
+    title: "Lowest Common Ancestor of a Binary Tree",
+    difficulty: "Medium",
+    description:
+      "Given a binary tree, find the lowest common ancestor (LCA) of two given nodes in the tree.",
+    examples: [
+      { input: "root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 1", output: "3" },
+    ],
+    constraints: [
+      "The number of nodes in the binary tree is in the range [2, 10⁵]",
+    ],
+    functionSignature: "function lowestCommonAncestor(root, p, q) { }",
+  },
+  {
+    id: 28,
+    title: "Longest Palindromic Substring",
+    difficulty: "Medium",
+    description:
+      "Given a string s, return the longest palindromic substring in s.",
+    examples: [
+      { input: 's = "babad"', output: '"bab"' },
+    ],
+    constraints: [
+      "1 <= s.length <= 1000",
+    ],
+    functionSignature: "function longestPalindrome(s) { }",
+  },
+  {
+    id: 29,
+    title: "Rotate Image",
+    difficulty: "Medium",
+    description:
+      "You are given an n x n 2D matrix representing an image, rotate the image by 90 degrees (clockwise).",
+    examples: [
+      {
+        input: `matrix = [
+  [1,2,3],
+  [4,5,6],
+  [7,8,9]
+]`,
+        output: `[
+  [7,4,1],
+  [8,5,2],
+  [9,6,3]
+]`,
+      },
+    ],
+    constraints: [
+      "n == matrix.length == matrix[i].length",
+      "1 <= n <= 20",
+    ],
+    functionSignature: "function rotate(matrix) { }",
+  },
+  {
+    id: 30,
+    title: "Merge Intervals",
+    difficulty: "Medium",
+    description:
+      "Given an array of intervals where intervals[i] = [starti, endi], merge all overlapping intervals.",
+    examples: [
+      { input: "intervals = [[1,3],[2,6],[8,10],[15,18]]", output: "[[1,6],[8,10],[15,18]]" },
+    ],
+    constraints: [
+      "1 <= intervals.length <= 10⁴",
+    ],
+    functionSignature: "function merge(intervals) { }",
   },
 ];
 

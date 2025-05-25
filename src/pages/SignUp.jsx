@@ -19,7 +19,7 @@ const SignUp = () => {
             alert("Passwords do not match!");
             return;
         }
-
+0.
         // TODO: Send data to backend
         navigate("/")
         console.log("Signup data:", formData);
