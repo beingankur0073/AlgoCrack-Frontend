@@ -1,112 +1,141 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "../utils/api"; // or just axios if you use default
+import { useAuth } from "../context/AuthContext";
 
 const SignUp = () => {
-    const [formData, setFormData] = useState({
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-    });
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    username: "",
+    password: "",
+    confirmPassword: "",
+    avatar: null,
+  });
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: files ? files[0] : value,
+    }));
+  };
 
-        if (formData.password !== formData.confirmPassword) {
-            alert("Passwords do not match!");
-            return;
-        }
-0.
-        // TODO: Send data to backend
-        navigate("/")
-        console.log("Signup data:", formData);
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white px-4">
-            <div className="w-full max-w-md p-8 rounded-2xl bg-gray-900 shadow-xl">
-                <h2 className="text-3xl font-bold mb-6 text-center">Sign Up</h2>
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    <div>
-                        <label htmlFor="name" className="block mb-1 text-sm font-medium">
-                            Name
-                        </label>
-                        <input
-                            id="name"
-                            name="name"
-                            type="text"
-                            required
-                            value={formData.name}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
 
-                    <div>
-                        <label htmlFor="email" className="block mb-1 text-sm font-medium">
-                            Email
-                        </label>
-                        <input
-                            id="email"
-                            name="email"
-                            type="email"
-                            required
-                            value={formData.email}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
+    const form = new FormData();
+    form.append("fullName", formData.fullName);
+    form.append("email", formData.email);
+    form.append("username", formData.username);
+    form.append("password", formData.password);
+    form.append("avatar", formData.avatar);
 
-                    <div>
-                        <label htmlFor="password" className="block mb-1 text-sm font-medium">
-                            Password
-                        </label>
-                        <input
-                            id="password"
-                            name="password"
-                            type="password"
-                            required
-                            value={formData.password}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
+    try {
+      setLoading(true);
+      const res = await axios.post("/auth/register", form);
+      const { user, token } = res.data.data;
+      login(user, token);
+      navigate("/");
+    } catch (error) {
+      console.error("Signup error:", error?.response?.data || error.message);
+      alert(error?.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-                    <div>
-                        <label htmlFor="confirmPassword" className="block mb-1 text-sm font-medium">
-                            Confirm Password
-                        </label>
-                        <input
-                            id="confirmPassword"
-                            name="confirmPassword"
-                            type="password"
-                            required
-                            value={formData.confirmPassword}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white px-4">
+      <div className="w-full max-w-md p-8 rounded-2xl bg-gray-900 shadow-xl">
+        <h2 className="text-3xl font-bold mb-6 text-center">Sign Up</h2>
+        <form onSubmit={handleSubmit} className="space-y-5" encType="multipart/form-data">
+          <input
+            type="text"
+            name="fullName"
+            placeholder="Full Name"
+            value={formData.fullName}
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700"
+          />
 
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-                    >
-                        Create Account
-                    </button>
-                </form>
+          <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            value={formData.username}
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700"
+          />
 
-                <p className="text-sm text-center mt-6">
-                    Already have an account?{" "}
-                    <a href="/login" className="text-blue-400 hover:underline">
-                        Log in
-                    </a>
-                </p>
-            </div>
-        </div>
-    );
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700"
+          />
+
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700"
+          />
+
+          <input
+            type="password"
+            name="confirmPassword"
+            placeholder="Confirm Password"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700"
+          />
+
+          <input
+            type="file"
+            name="avatar"
+            accept="image/*"
+            onChange={handleChange}
+            required
+            className="w-full text-sm text-gray-400"
+          />
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+          >
+            {loading ? "Creating Account..." : "Create Account"}
+          </button>
+        </form>
+
+        <p className="text-sm text-center mt-6">
+          Already have an account?{" "}
+          <a href="/login" className="text-blue-400 hover:underline">
+            Log in
+          </a>
+        </p>
+      </div>
+    </div>
+  );
 };
 
 export default SignUp;

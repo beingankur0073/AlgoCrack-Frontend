@@ -1,15 +1,36 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "../utils/api"; // your axios instance
+import { useAuth } from "../context/AuthContext";
 
-const Login=()=> {
-  const [email, setEmail] = useState("");
+const Login = () => {
+  const [username, setUsername] = useState(""); // changed from email to username
   const [password, setPassword] = useState("");
-  const navigate=useNavigate()
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Handle login logic here
-    navigate("/")
+
+    try {
+      setLoading(true);
+
+      const res = await axios.post("/users/login", { username, password });
+
+    
+      console.log("Login response:", res.data);
+
+      const { user, token } = res.data.data;
+      login(user, token); 
+      navigate("/"); 
+    } catch (error) {
+      console.error("Login failed:", error);
+      alert(error?.response?.data?.message || "Invalid username or password");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -18,14 +39,14 @@ const Login=()=> {
         <h2 className="text-3xl font-bold mb-6 text-center">Login</h2>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="email" className="block mb-1 text-sm font-medium">
-              Email
+            <label htmlFor="username" className="block mb-1 text-sm font-medium">
+              Username
             </label>
             <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
               className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -45,9 +66,10 @@ const Login=()=> {
           </div>
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
           >
-            Sign In
+            {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
         <p className="text-sm text-center mt-6">
@@ -59,6 +81,6 @@ const Login=()=> {
       </div>
     </div>
   );
-}
+};
 
 export default Login;
