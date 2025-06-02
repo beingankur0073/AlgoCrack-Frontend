@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "../utils/api"; // or just axios if you use default
+import axios from "../utils/api";
 import { useAuth } from "../context/AuthContext";
 
 const SignUp = () => {
@@ -9,29 +9,27 @@ const SignUp = () => {
     email: "",
     username: "",
     password: "",
-    confirmPassword: "",
     avatar: null,
   });
 
+  const [avatarPreview, setAvatarPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: files ? files[0] : value,
-    }));
+    if (name === "avatar" && files.length > 0) {
+      const file = files[0];
+      setFormData((prev) => ({ ...prev, avatar: file }));
+      setAvatarPreview(URL.createObjectURL(file));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
-      return;
-    }
 
     const form = new FormData();
     form.append("fullName", formData.fullName);
@@ -54,10 +52,29 @@ const SignUp = () => {
     }
   };
 
+  const handleAvatarClick = () => {
+    document.getElementById("avatarInput").click();
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white px-4">
       <div className="w-full max-w-md p-8 rounded-2xl bg-gray-900 shadow-xl">
         <h2 className="text-3xl font-bold mb-6 text-center">Sign Up</h2>
+
+        {/* Avatar Preview */}
+        <div className="flex justify-center mb-6">
+          <div
+            className="w-24 h-24 rounded-full border-2 border-blue-500 cursor-pointer overflow-hidden"
+            onClick={handleAvatarClick}
+          >
+            <img
+              src={avatarPreview || "https://i.pravatar.cc/100?img=68"}
+              alt="Avatar Preview"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-5" encType="multipart/form-data">
           <input
             type="text"
@@ -99,23 +116,15 @@ const SignUp = () => {
             className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700"
           />
 
+          {/* Hidden file input triggered by avatar click */}
           <input
-            type="password"
-            name="confirmPassword"
-            placeholder="Confirm Password"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700"
-          />
-
-          <input
+            id="avatarInput"
             type="file"
             name="avatar"
             accept="image/*"
             onChange={handleChange}
+            className="hidden"
             required
-            className="w-full text-sm text-gray-400"
           />
 
           <button

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import sampleProblems from "../constants/sampleQuestion.js";
 import { getColor } from "../utils/colorFunc.js";
+import { useAuth } from "../context/AuthContext.jsx";
+import { useNavigate } from "react-router-dom";
 
 const difficultyOrder = { Easy: 1, Medium: 2, Hard: 3 };
 
@@ -10,53 +12,75 @@ const Main = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
 
+  const { auth, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const avatarUrl = auth?.user?.avatar || "https://i.pravatar.cc/40?img=3";
+
   useEffect(() => {
     setProblems(sampleProblems);
     setFiltered(sampleProblems);
   }, []);
 
- useEffect(() => {
-  if (searchTerm === "") {
-    setFiltered(problems);
-  } else {
-    setFiltered(
-      problems.filter((problem) =>
-        problem.title.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    );
-  }
-}, [searchTerm, problems]);
+  useEffect(() => {
+    if (searchTerm === "") {
+      setFiltered(problems);
+    } else {
+      setFiltered(
+        problems.filter((problem) =>
+          problem.title.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      );
+    }
+  }, [searchTerm, problems]);
 
   const sortByDifficulty = () => {
-    const sorted = [...filtered].sort((a, b) => {
-      return sortAsc
+    const sorted = [...filtered].sort((a, b) =>
+      sortAsc
         ? difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty]
-        : difficultyOrder[b.difficulty] - difficultyOrder[a.difficulty];
-    });
+        : difficultyOrder[b.difficulty] - difficultyOrder[a.difficulty]
+    );
     setFiltered(sorted);
     setSortAsc(!sortAsc);
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
-    <div className="min-h-screen bg-gray-950 text-white px-4 py-10 flex justify-center">
+    <div className="fixed inset-0 bg-gray-950 text-white flex justify-center items-start overflow-hidden">
       <div className="w-full max-w-5xl">
         {/* Top Header Row */}
-        <div className="flex items-center justify-between mb-6 sticky top-0 z-30 bg-gray-950 py-2">
+        <div className="flex items-center mb-6 sticky top-0 z-30 bg-gray-950 py-2 px-2">
+          {/* Logo on far left */}
           <h1 className="text-4xl font-bold text-blue-400">AlgoCrack</h1>
+
+          {/* Spacer to push to right */}
+          <div className="flex-grow" />
+
+          {/* Right section: Search | Logout | Avatar */}
           <div className="flex items-center gap-4">
             <input
               type="text"
-              placeholder="Filter by difficulty..."
+              placeholder="Search problems..."
               className="px-3 py-1 rounded-lg bg-gray-800 text-white border border-gray-600"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
             <button
-              onClick={() => alert("Logged out")}
+              onClick={handleLogout}
               className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold"
             >
               Logout
             </button>
+            <img
+              src={ avatarUrl}
+              alt="Profile"
+              className="w-10 h-10 rounded-full border-2 border-blue-400 cursor-pointer"
+              onClick={() => navigate("/profile")}
+            />
           </div>
         </div>
 
@@ -87,7 +111,9 @@ const Main = () => {
                     <td className="p-4 text-blue-300 hover:underline">
                       {problem.title}
                     </td>
-                    <td className={`p-4 font-semibold ${getColor(problem.difficulty)}`}>
+                    <td
+                      className={`p-4 font-semibold ${getColor(problem.difficulty)}`}
+                    >
                       {problem.difficulty}
                     </td>
                   </tr>

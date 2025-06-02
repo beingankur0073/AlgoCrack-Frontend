@@ -24,6 +24,7 @@ const Login = () => {
 
       const { user, token } = res.data.data;
       login(user, token); 
+      
       navigate("/"); 
     } catch (error) {
       console.error("Login failed:", error);
