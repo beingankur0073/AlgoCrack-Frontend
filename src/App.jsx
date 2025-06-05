@@ -4,10 +4,22 @@ import SignUp from "./pages/SignUp.jsx";
 import Main from "./pages/Main.jsx";
 import Problem from "./pages/Problem";
 import ProtectedRoute from "./utils/protectedRoute.jsx"; // import
+import { Toaster } from "react-hot-toast";
 
 const App = () => {
   return (
+   
     <Router>
+     <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: "#1f2937", // Tailwind's bg-gray-800
+            color: "#fff",
+          },
+        }}
+        containerStyle={{ position: 'fixed', top: 16, right: 16 }}
+      />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
@@ -31,6 +43,7 @@ const App = () => {
         />
       </Routes>
     </Router>
+ 
   );
 };
 

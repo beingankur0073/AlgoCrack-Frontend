@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import sampleProblems from "../constants/sampleQuestion.js";
 import { getColor } from "../utils/colorFunc.js";
 import { useAuth } from "../context/AuthContext.jsx";
+import axios from "../utils/api"; 
 import { useNavigate } from "react-router-dom";
+import { useProblems } from "../context/ProblemContext";
+
 
 const difficultyOrder = { Easy: 1, Medium: 2, Hard: 3 };
 
 const Main = () => {
-  const [problems, setProblems] = useState([]);
+  const { problems, setProblems, setSelectedProblem } = useProblems();
+  
   const [filtered, setFiltered] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
@@ -18,9 +21,18 @@ const Main = () => {
   const avatarUrl = auth?.user?.avatar || "https://i.pravatar.cc/40?img=3";
 
   useEffect(() => {
-    setProblems(sampleProblems);
-    setFiltered(sampleProblems);
-  }, []);
+  const fetchProblems = async () => {
+    try {
+      const res = await axios.get("/problems");
+      setProblems(res.data.data);
+      setFiltered(res.data.data);
+    } catch (error) {
+      console.error("Failed to fetch problems:", error);
+    }
+  };
+  fetchProblems();
+}, []);
+
 
   useEffect(() => {
     if (searchTerm === "") {
@@ -50,12 +62,16 @@ const Main = () => {
   };
 
   return (
+
+
+
     <div className="fixed inset-0 bg-gray-950 text-white flex justify-center items-start overflow-hidden">
+
       <div className="w-full max-w-5xl">
         {/* Top Header Row */}
-        <div className="flex items-center mb-6 sticky top-0 z-30 bg-gray-950 py-2 px-2">
-          {/* Logo on far left */}
-          <h1 className="text-4xl font-bold text-blue-400">AlgoCrack</h1>
+        <div className="flex items-center justify-end mb-6 sticky top-0 z-30 bg-gray-950 py-2 px-2 mt-10">
+          
+          <h1 className="text-4xl font-bold text-blue-400 ">AlgoCrack</h1>
 
           {/* Spacer to push to right */}
           <div className="flex-grow" />
@@ -84,6 +100,12 @@ const Main = () => {
           </div>
         </div>
 
+
+
+
+
+
+
         {/* Problem Table */}
         <div className="bg-gray-900 rounded-xl shadow-md overflow-hidden">
           <div className="max-h-[70vh] overflow-y-auto">
@@ -103,10 +125,13 @@ const Main = () => {
               <tbody>
                 {filtered.map((problem, index) => (
                   <tr
-                    key={problem.id}
+                    key={problem._id}
                     className="hover:bg-gray-800 border-b border-gray-800 cursor-pointer"
-                    onClick={() => (window.location.href = `/problems/${problem.id}`)}
-                  >
+                    onClick={() => {
+                        setSelectedProblem(problem);
+                        navigate(`/problems/${problem._id}`);
+                      }}
+                  > 
                     <td className="p-4">{index + 1}</td>
                     <td className="p-4 text-blue-300 hover:underline">
                       {problem.title}

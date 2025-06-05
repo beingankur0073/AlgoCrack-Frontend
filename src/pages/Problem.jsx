@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import sampleProblems from "../constants/sampleQuestion.js";
 import CodeEditor from "../components/CodeEditor.jsx";
+import axios from "../utils/api"; 
 
 const DEFAULT_SIGNATURES = {
   javascript: "// Write your code here (JS)",
@@ -10,25 +10,36 @@ const DEFAULT_SIGNATURES = {
 };
 
 const Problem = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // _id from MongoDB
   const navigate = useNavigate();
   const [code, setCode] = useState("");
   const [output, setOutput] = useState("");
   const [problem, setProblem] = useState(null);
   const [language, setLanguage] = useState("javascript");
 
+  
   useEffect(() => {
-    const found = sampleProblems.find((p) => p.id === parseInt(id));
-    setProblem(found);
-    if (found) {
-      const sig = found.functionSignature?.[language] || DEFAULT_SIGNATURES[language];
-      setCode(sig);
-    }
+    const fetchProblem = async () => {
+      try {
+       
+        const res = await axios.get(`problems/details?ProblemId=${id}`);
+        const data=res.data.data
+        setProblem(data);
+
+        const sig = data.functionSignatures?.[language] || DEFAULT_SIGNATURES[language];
+        setCode(sig);
+      } catch (error) {
+        console.error("Failed to fetch problem:", error);
+      }
+    };
+
+    fetchProblem();
   }, [id]);
 
+  // 🔄 Update code when language changes
   useEffect(() => {
     if (problem) {
-      const sig = problem.functionSignature?.[language] || DEFAULT_SIGNATURES[language];
+      const sig = problem.functionSignatures?.[language] || DEFAULT_SIGNATURES[language];
       setCode(sig);
     }
   }, [language]);
@@ -55,10 +66,7 @@ const Problem = () => {
     <div className="fixed inset-0 bg-gray-950 text-white flex flex-col overflow-hidden">
       {/* Top Bar */}
       <div className="max-w-6xl w-full mx-auto flex justify-between items-center px-4 py-6">
-        <button
-          onClick={() => navigate(-1)}
-          className="text-blue-400 hover:underline"
-        >
+        <button onClick={() => navigate(-1)} className="text-blue-400 hover:underline">
           ← Back
         </button>
         <button
@@ -90,9 +98,11 @@ const Problem = () => {
             <div>
               <h3 className="text-lg font-semibold mb-2">Constraints:</h3>
               <ul className="list-disc list-inside text-gray-400">
-                {problem.constraints.map((c, i) => (
-                  <li key={i}>{c}</li>
-                ))}
+                {problem.constraints
+                  .split(/[|,\n]/) // handles delimiter splitting
+                  .map((c, i) => (
+                    <li key={i}>{c.trim()}</li>
+                  ))}
               </ul>
             </div>
           </div>

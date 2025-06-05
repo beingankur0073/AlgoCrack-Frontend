@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../utils/api"; // your axios instance
 import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 const Login = () => {
   const [username, setUsername] = useState(""); // changed from email to username
@@ -24,18 +25,19 @@ const Login = () => {
 
       const { user, token } = res.data.data;
       login(user, token); 
-      
+       toast.success(`Welcome back, ${user.username}!`);
       navigate("/"); 
     } catch (error) {
       console.error("Login failed:", error);
-      alert(error?.response?.data?.message || "Invalid username or password");
+      toast.error(error?.response?.data?.message || "Invalid username or password");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white px-4">
+    <div className="h-screen flex items-center justify-center bg-gray-950 text-white px-4 overflow-hidden">
+
       <div className="w-full max-w-md p-8 rounded-2xl bg-gray-900 shadow-lg">
         <h2 className="text-3xl font-bold mb-6 text-center">Login</h2>
         <form onSubmit={handleSubmit} className="space-y-5">
