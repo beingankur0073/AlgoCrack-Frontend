@@ -40,9 +40,10 @@ const SignUp = () => {
 
     try {
       setLoading(true);
-      const res = await axios.post("/auth/register", form);
-      const { user, token } = res.data.data;
-      login(user, token);
+      const res = await axios.post("/users/register", form);
+      console.log(res)
+      const user = res.data.data;
+      login(user, "");
       navigate("/");
     } catch (error) {
       console.error("Signup error:", error?.response?.data || error.message);

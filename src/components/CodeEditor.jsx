@@ -58,10 +58,31 @@ const CodeEditor = ({ code, setCode, handleRun, output, language, setLanguage })
       </div>
 
       {/* Output */}
-      <div className="bg-gray-900 p-4 rounded-xl text-green-400 font-mono shadow-inner">
-        <h4 className="font-bold mb-2">Output:</h4>
-        <pre>{output}</pre>
-      </div>
+    <div className="bg-gray-900 p-4 rounded-xl text-green-400 font-mono shadow-inner overflow-auto max-h-64">
+          <h4 className="font-bold mb-2 text-white">Output:</h4>
+          {Array.isArray(output?.testCaseResults) ? (
+            output.testCaseResults.map((test, index) => (
+              <div key={test._id} className="mb-2">
+                <div><span className="text-gray-400">Test Case {index + 1}:</span></div>
+                <div><span className="text-blue-300">Input:</span> {test.input}</div>
+                <div><span className="text-yellow-300">Expected:</span> {test.expectedOutput}</div>
+                <div><span className="text-green-300">Output:</span> {test.actualOutput.trim()}</div>
+                <div>
+                  <span
+                    className={`font-semibold ${
+                      test.status === "Passed" ? "text-green-500" : "text-red-500"
+                    }`}
+                  >
+                    {test.status}
+                  </span>
+                </div>
+              </div>
+            ))
+          ) : (
+            <pre className="whitespace-pre-wrap break-words">{output}</pre>
+          )}
+        </div>
+      
     </div>
   );
 };

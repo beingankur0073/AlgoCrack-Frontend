@@ -9,6 +9,7 @@ const DEFAULT_SIGNATURES = {
   cpp: "// Write your code here (C++)"
 };
 
+
 const Problem = () => {
   const { id } = useParams(); // _id from MongoDB
   const navigate = useNavigate();
@@ -44,10 +45,128 @@ const Problem = () => {
     }
   }, [language]);
 
-  const handleRun = () => {
-    console.log("Running code:", code);
-    setOutput("Mock output: [0, 1]");
+  const handleRun = async () => {
+    setOutput("⏳ Running...");
+
+    const accessToken = localStorage.getItem("accessToken"); // Adjust if stored elsewhere
+
+    try {
+      // Get the numeric languageId from your mapping
+     
+
+      // Step 1: Submit code
+      const submitRes = await axios.post(
+        `/submissions/${id}`, // Changed to /submissions to match common API design where problemId is in body
+        {
+          code,
+          language: language, 
+          problemId: problem._id,      // ✅ Send problem ID in the body
+          // You might also send userId if it's not extracted from the JWT
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+
+      console.log(submitRes.data.data)
+      const submissionId = submitRes.data.data.submissionId; 
+      console.log("✅ Submission ID:", submissionId);
+
+      // Step 2: Poll result
+     const pollResult = async (retry = 0) => {
+          try {
+            const res = await axios.get(`/submissions/${submissionId}`, {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+              },
+            });
+
+            // Unwrap the actual data object from response
+            const {
+              status,
+              testCaseResults,
+              compileOutput,
+              stderr,
+            } = res.data.data; // <-- Note: response has 'data.data'
+
+            // Handle retry loop
+            if (status === "Pending" || status === "Processing") {
+              if (retry < 10) {
+                setTimeout(() => pollResult(retry + 1), 1500);
+              } else {
+                setOutput("⏳ Timeout: Judging took too long.");
+              }
+              return;
+            }
+
+            // Compilation error
+            if (status === "Compilation Error") {
+              setOutput(`❌ Compilation Error:\n${compileOutput || "No compilation output."}`);
+              return;
+            }
+
+            // Runtime error
+            if (status === "Runtime Error") {
+              setOutput(`❌ Runtime Error:\n${stderr || "No runtime error output."}`);
+              return;
+            }
+
+            // All test cases passed
+            if (status === "Accepted") {
+              const formattedResults = Array.isArray(testCaseResults)
+                ? testCaseResults.map((test, index) => {
+                    return (
+                      `✅ Test Case ${index + 1}:\n` +
+                      `  Input: ${test.input}\n` +
+                      `  Expected: ${test.expectedOutput}\n` +
+                      `  Output: ${test.actualOutput?.trim()}\n` +
+                      `  Status: ${test.status}\n`
+                    );
+                  }).join("\n")
+                : "✅ All test cases passed, but no detailed test results found.";
+
+              setOutput(`🎉 Accepted! All test cases passed.\n\n${formattedResults}`);
+              return;
+            }
+
+            // Handle failed test cases like Wrong Answer, TLE, etc.
+            if (Array.isArray(testCaseResults)) {
+              const failedCase = testCaseResults.find(tc => tc.status !== "Passed");
+
+              if (failedCase) {
+                setOutput(
+                  `❌ ${status} on a test case:\n` +
+                  `  Input: ${failedCase.input}\n` +
+                  `  Expected: ${failedCase.expectedOutput}\n` +
+                  `  Output: ${failedCase.actualOutput?.trim() || "N/A"}\n`
+                );
+              } else {
+                setOutput(`❌ ${status}. No failed test case data available.`);
+              }
+            } else {
+              setOutput(`❌ ${status}. Test case results not available.`);
+            }
+
+          } catch (err) {
+            console.error("❌ Error while polling:", err);
+            setOutput(`❌ Error while fetching result: ${err.response?.data?.message || err.message || 'Unknown error'}.`);
+          }
+        };
+
+
+      pollResult();
+    } catch (err) {
+      console.error("❌ Submission failed:", err);
+      // More detailed error message from backend
+      setOutput(`❌ Submission failed: ${err.response?.data?.message || err.message || 'Unknown error'}.`);
+    }
   };
+
+
 
   const handleLogout = () => {
     alert("Logging out...");
@@ -116,6 +235,7 @@ const Problem = () => {
             language={language}
             setLanguage={setLanguage}
           />
+
         </div>
       </div>
     </div>

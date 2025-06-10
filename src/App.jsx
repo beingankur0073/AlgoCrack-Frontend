@@ -5,6 +5,7 @@ import Main from "./pages/Main.jsx";
 import Problem from "./pages/Problem";
 import ProtectedRoute from "./utils/protectedRoute.jsx"; // import
 import { Toaster } from "react-hot-toast";
+import Profile from "./pages/Profile.jsx";
 
 const App = () => {
   return (
@@ -41,6 +42,18 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+
       </Routes>
     </Router>
  
