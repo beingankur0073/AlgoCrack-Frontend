@@ -47,18 +47,14 @@ const CodeEditor = ({ code, setCode, handleRun, output, language, setLanguage })
       </div>
 
       {/* Buttons */}
-      <div className="flex gap-4">
+      <div className="flex gap-4 justify-end">
         <button
           onClick={handleRun}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold"
-        >
-          Run Code
-        </button>
-        <button
           className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold"
         >
           Submit
         </button>
+      
       </div>
 
       {/* Output */}

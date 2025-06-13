@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import CodeEditor from "../components/CodeEditor.jsx";
 import axios from "../utils/api"; 
 import confetti from 'canvas-confetti';
+import toast from "react-hot-toast"; 
 
 const DEFAULT_SIGNATURES = {
   javascript: "// Write your code here (JS)",
@@ -74,8 +75,7 @@ const Problem = () => {
 
       console.log(submitRes.data.data)
       const submissionId = submitRes.data.data.submissionId; 
-      console.log("✅ Submission ID:", submissionId);
-
+     
       // Step 2: Poll result
      const pollResult = async (retry = 0) => {
           try {
@@ -165,7 +165,7 @@ const Problem = () => {
 
 
   const handleLogout = () => {
-    alert("Logging out...");
+    toast.success("Logged out successfully!"); //
     navigate("/login");
   };
 
