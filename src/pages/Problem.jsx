@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import CodeEditor from "../components/CodeEditor.jsx";
 import axios from "../utils/api"; 
+import confetti from 'canvas-confetti';
 
 const DEFAULT_SIGNATURES = {
   javascript: "// Write your code here (JS)",
@@ -14,7 +15,7 @@ const Problem = () => {
   const { id } = useParams(); // _id from MongoDB
   const navigate = useNavigate();
   const [code, setCode] = useState("");
-  const [output, setOutput] = useState("");
+  const [output, setOutput] = useState([]);
   const [problem, setProblem] = useState(null);
   const [language, setLanguage] = useState("javascript");
 
@@ -46,7 +47,7 @@ const Problem = () => {
   }, [language]);
 
   const handleRun = async () => {
-    setOutput("⏳ Running...");
+    setOutput(["⏳ Running..."]);
 
     const accessToken = localStorage.getItem("accessToken"); // Adjust if stored elsewhere
 
@@ -94,68 +95,63 @@ const Problem = () => {
             } = res.data.data; // <-- Note: response has 'data.data'
 
             // Handle retry loop
-            if (status === "Pending" || status === "Processing") {
-              if (retry < 10) {
-                setTimeout(() => pollResult(retry + 1), 1500);
-              } else {
-                setOutput("⏳ Timeout: Judging took too long.");
-              }
-              return;
-            }
-
-            // Compilation error
-            if (status === "Compilation Error") {
-              setOutput(`❌ Compilation Error:\n${compileOutput || "No compilation output."}`);
-              return;
-            }
-
-            // Runtime error
-            if (status === "Runtime Error") {
-              setOutput(`❌ Runtime Error:\n${stderr || "No runtime error output."}`);
-              return;
-            }
-
-            // All test cases passed
-            if (status === "Accepted") {
-              const formattedResults = Array.isArray(testCaseResults)
-                ? testCaseResults.map((test, index) => {
-                    return (
-                      `✅ Test Case ${index + 1}:\n` +
-                      `  Input: ${test.input}\n` +
-                      `  Expected: ${test.expectedOutput}\n` +
-                      `  Output: ${test.actualOutput?.trim()}\n` +
-                      `  Status: ${test.status}\n`
-                    );
-                  }).join("\n")
-                : "✅ All test cases passed, but no detailed test results found.";
-
-              setOutput(`🎉 Accepted! All test cases passed.\n\n${formattedResults}`);
-              return;
-            }
-
-            // Handle failed test cases like Wrong Answer, TLE, etc.
-            if (Array.isArray(testCaseResults)) {
-              const failedCase = testCaseResults.find(tc => tc.status !== "Passed");
-
-              if (failedCase) {
-                setOutput(
-                  `❌ ${status} on a test case:\n` +
-                  `  Input: ${failedCase.input}\n` +
-                  `  Expected: ${failedCase.expectedOutput}\n` +
-                  `  Output: ${failedCase.actualOutput?.trim() || "N/A"}\n`
-                );
-              } else {
-                setOutput(`❌ ${status}. No failed test case data available.`);
-              }
-            } else {
-              setOutput(`❌ ${status}. Test case results not available.`);
-            }
-
-          } catch (err) {
-            console.error("❌ Error while polling:", err);
-            setOutput(`❌ Error while fetching result: ${err.response?.data?.message || err.message || 'Unknown error'}.`);
+             if (status === "Pending" || status === "Processing") {
+          if (retry < 10) {
+            setTimeout(() => pollResult(retry + 1), 1500);
+          } else {
+            setOutput(["⏳ Timeout: Judging took too long."]);
           }
-        };
+          return;
+        }
+
+        if (status === "Compilation Error") {
+          setOutput([`❌ Compilation Error:\n${compileOutput || "No compilation output."}`]);
+          return;
+        }
+
+        if (status === "Runtime Error") {
+          setOutput([`❌ Runtime Error:\n${stderr || "No runtime error output."}`]);
+          return;
+        }
+
+        if (status === "Accepted") {
+          confetti({
+            particleCount: 150,
+            spread: 90,
+            origin: { y: 0.6 },
+          });
+
+      const formattedResults = testCaseResults.map((test, index) =>
+            `Test Case ${index + 1}:\n  Input: ${test.input}\n  Expected: ${test.expectedOutput}\n  Output: ${test.actualOutput?.trim()}\n  Status: ${test.status}`
+          );
+
+          setOutput([
+            `🎉 Accepted! All test cases passed.`,
+            ...formattedResults
+          ]);
+          return;
+        }
+
+        if (Array.isArray(testCaseResults)) {
+          const failedCase = testCaseResults.find(tc => tc.status !== "Passed");
+          const formattedResults = testCaseResults.map((test, index) =>
+            `Test Case ${index + 1}:\n  Input: ${test.input}\n  Expected: ${test.expectedOutput}\n  Output: ${test.actualOutput?.trim()}\n  Status: ${test.status}`
+          );
+          if (failedCase) {
+            setOutput([
+              `❌ ${status} on a test case:`,
+              ...formattedResults
+            ]);
+          } else {
+            setOutput([`❌ ${status}. No failed test case data available.`, ...formattedResults]);
+          }
+        } else {
+          setOutput([`❌ ${status}. Test case results not available.`]);
+        }
+      } catch (err) {
+        setOutput([`❌ Error while fetching result: ${err.response?.data?.message || err.message || 'Unknown error'}.`]);
+      }
+    };
 
 
       pollResult();

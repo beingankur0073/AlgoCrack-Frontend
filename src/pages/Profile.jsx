@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import axios from "../utils/api";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
   const avatarInputRef = useRef(null);
   const coverInputRef = useRef(null);
   const navigate = useNavigate();
+  const { updateUser } = useAuth();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -34,6 +36,7 @@ const Profile = () => {
       const res = await axios.patch("/users/updateAvatar", formData);
       setUser((prev) => ({ ...prev, avatar: res.data.data.avatar }));
       toast.success("Avatar updated successfully");
+      updateUser({ avatar: res.data.data.avatar });
     } catch (err) {
       console.error("Error updating avatar", err);
       toast.error("Failed to update avatar");
