@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import axios from "../utils/api"; 
 import { useNavigate } from "react-router-dom";
 import { useProblems } from "../context/ProblemContext";
+import toast from "react-hot-toast";
 
 
 const difficultyOrder = { Easy: 1, Medium: 2, Hard: 3 };
@@ -57,6 +58,7 @@ const Main = () => {
   };
 
   const handleLogout = () => {
+     toast.success("Logged out successfully!");
     logout();
     navigate("/login");
   };

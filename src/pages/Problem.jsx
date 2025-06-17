@@ -1,9 +1,12 @@
+// Replace all color classes to use a new palette (example: teal, slate, amber, rose)
+// You can adjust these Tailwind colors as you like.
+
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import CodeEditor from "../components/CodeEditor.jsx";
-import axios from "../utils/api"; 
+import axios from "../utils/api";
 import confetti from 'canvas-confetti';
-import toast from "react-hot-toast"; 
+import toast from "react-hot-toast";
 
 const DEFAULT_SIGNATURES = {
   javascript: "// Write your code here (JS)",
@@ -11,22 +14,19 @@ const DEFAULT_SIGNATURES = {
   cpp: "// Write your code here (C++)"
 };
 
-
 const Problem = () => {
-  const { id } = useParams(); // _id from MongoDB
+  const { id } = useParams();
   const navigate = useNavigate();
   const [code, setCode] = useState("");
   const [output, setOutput] = useState([]);
   const [problem, setProblem] = useState(null);
   const [language, setLanguage] = useState("javascript");
 
-  
   useEffect(() => {
     const fetchProblem = async () => {
       try {
-       
         const res = await axios.get(`problems/details?ProblemId=${id}`);
-        const data=res.data.data
+        const data = res.data.data;
         setProblem(data);
 
         const sig = data.functionSignatures?.[language] || DEFAULT_SIGNATURES[language];
@@ -39,7 +39,6 @@ const Problem = () => {
     fetchProblem();
   }, [id]);
 
-  // 🔄 Update code when language changes
   useEffect(() => {
     if (problem) {
       const sig = problem.functionSignatures?.[language] || DEFAULT_SIGNATURES[language];
@@ -49,21 +48,15 @@ const Problem = () => {
 
   const handleRun = async () => {
     setOutput(["⏳ Running..."]);
-
-    const accessToken = localStorage.getItem("accessToken"); // Adjust if stored elsewhere
+    const accessToken = localStorage.getItem("accessToken");
 
     try {
-      // Get the numeric languageId from your mapping
-     
-
-      // Step 1: Submit code
       const submitRes = await axios.post(
-        `/submissions/${id}`, // Changed to /submissions to match common API design where problemId is in body
+        `/submissions/${id}`,
         {
           code,
-          language: language, 
-          problemId: problem._id,      // ✅ Send problem ID in the body
-          // You might also send userId if it's not extracted from the JWT
+          language: language,
+          problemId: problem._id,
         },
         {
           headers: {
@@ -72,121 +65,112 @@ const Problem = () => {
         }
       );
 
+      const submissionId = submitRes.data.data.submissionId;
 
-      console.log(submitRes.data.data)
-      const submissionId = submitRes.data.data.submissionId; 
-     
-      // Step 2: Poll result
-     const pollResult = async (retry = 0) => {
-          try {
-            const res = await axios.get(`/submissions/${submissionId}`, {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Content-Type": "application/json",
-              },
-            });
-
-            // Unwrap the actual data object from response
-            const {
-              status,
-              testCaseResults,
-              compileOutput,
-              stderr,
-            } = res.data.data; // <-- Note: response has 'data.data'
-
-            // Handle retry loop
-             if (status === "Pending" || status === "Processing") {
-          if (retry < 10) {
-            setTimeout(() => pollResult(retry + 1), 1500);
-          } else {
-            setOutput(["⏳ Timeout: Judging took too long."]);
-          }
-          return;
-        }
-
-        if (status === "Compilation Error") {
-          setOutput([`❌ Compilation Error:\n${compileOutput || "No compilation output."}`]);
-          return;
-        }
-
-        if (status === "Runtime Error") {
-          setOutput([`❌ Runtime Error:\n${stderr || "No runtime error output."}`]);
-          return;
-        }
-
-        if (status === "Accepted") {
-          confetti({
-            particleCount: 150,
-            spread: 90,
-            origin: { y: 0.6 },
+      const pollResult = async (retry = 0) => {
+        try {
+          const res = await axios.get(`/submissions/${submissionId}`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
           });
 
-      const formattedResults = testCaseResults.map((test, index) =>
-            `Test Case ${index + 1}:\n  Input: ${test.input}\n  Expected: ${test.expectedOutput}\n  Output: ${test.actualOutput?.trim()}\n  Status: ${test.status}`
-          );
+          const {
+            status,
+            testCaseResults,
+            compileOutput,
+            stderr,
+          } = res.data.data;
 
-          setOutput([
-            `🎉 Accepted! All test cases passed.`,
-            ...formattedResults
-          ]);
-          return;
-        }
+          if (status === "Pending" || status === "Processing") {
+            if (retry < 10) {
+              setTimeout(() => pollResult(retry + 1), 1500);
+            } else {
+              setOutput(["⏳ Timeout: Judging took too long."]);
+            }
+            return;
+          }
 
-        if (Array.isArray(testCaseResults)) {
-          const failedCase = testCaseResults.find(tc => tc.status !== "Passed");
-          const formattedResults = testCaseResults.map((test, index) =>
-            `Test Case ${index + 1}:\n  Input: ${test.input}\n  Expected: ${test.expectedOutput}\n  Output: ${test.actualOutput?.trim()}\n  Status: ${test.status}`
-          );
-          if (failedCase) {
+          if (status === "Compilation Error") {
+            setOutput([`❌ Compilation Error:\n${compileOutput || "No compilation output."}`]);
+            return;
+          }
+
+          if (status === "Runtime Error") {
+            setOutput([`❌ Runtime Error:\n${stderr || "No runtime error output."}`]);
+            return;
+          }
+
+          if (status === "Accepted") {
+            confetti({
+              particleCount: 150,
+              spread: 90,
+              origin: { y: 0.6 },
+            });
+
+            const formattedResults = testCaseResults.map((test, index) =>
+              `Test Case ${index + 1}:\n  Input: ${test.input}\n  Expected: ${test.expectedOutput}\n  Output: ${test.actualOutput?.trim()}\n  Status: ${test.status}`
+            );
+
             setOutput([
-              `❌ ${status} on a test case:`,
+              `🎉 Accepted! All test cases passed.`,
               ...formattedResults
             ]);
-          } else {
-            setOutput([`❌ ${status}. No failed test case data available.`, ...formattedResults]);
+            return;
           }
-        } else {
-          setOutput([`❌ ${status}. Test case results not available.`]);
-        }
-      } catch (err) {
-        setOutput([`❌ Error while fetching result: ${err.response?.data?.message || err.message || 'Unknown error'}.`]);
-      }
-    };
 
+          if (Array.isArray(testCaseResults)) {
+            const failedCase = testCaseResults.find(tc => tc.status !== "Passed");
+            const formattedResults = testCaseResults.map((test, index) =>
+              `Test Case ${index + 1}:\n  Input: ${test.input}\n  Expected: ${test.expectedOutput}\n  Output: ${test.actualOutput?.trim()}\n  Status: ${test.status}`
+            );
+            if (failedCase) {
+              setOutput([
+                `❌ ${status} on a test case:`,
+                ...formattedResults
+              ]);
+            } else {
+              setOutput([`❌ ${status}. No failed test case data available.`, ...formattedResults]);
+            }
+          } else {
+            setOutput([`❌ ${status}. Test case results not available.`]);
+          }
+        } catch (err) {
+          setOutput([`❌ Error while fetching result: ${err.response?.data?.message || err.message || 'Unknown error'}.`]);
+        }
+      };
 
       pollResult();
     } catch (err) {
       console.error("❌ Submission failed:", err);
-      // More detailed error message from backend
       setOutput(`❌ Submission failed: ${err.response?.data?.message || err.message || 'Unknown error'}.`);
     }
   };
 
-
-
   const handleLogout = () => {
-    toast.success("Logged out successfully!"); //
+    toast.success("Logged out successfully!");
     navigate("/login");
   };
 
   if (!problem) {
     return (
-      <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
-        <p className="text-xl text-gray-400">Loading problem...</p>
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center">
+        <p className="text-xl text-slate-400">Loading problem...</p>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-gray-950 text-white flex flex-col overflow-hidden">
+    <div className="fixed inset-0 bg-slate-950 text-slate-100 flex flex-col overflow-hidden">
       {/* Top Bar */}
       <div className="max-w-6xl w-full mx-auto flex justify-between items-center px-4 py-6">
-        <button onClick={() => navigate(-1)} className="text-blue-400 hover:underline">
+        <button onClick={() => navigate(-1)} className="text-teal-400 hover:underline">
           ← Back
         </button>
         <button
           onClick={handleLogout}
-          className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md text-white"
+          className="bg-rose-600 hover:bg-rose-700 px-4 py-2 rounded-md text-white"
         >
           Logout
         </button>
@@ -196,14 +180,14 @@ const Problem = () => {
       <div className="flex-1 overflow-y-auto px-4 pb-6">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Problem description */}
-          <div className="bg-gray-900 p-6 rounded-xl shadow-md overflow-auto max-h-[80vh]">
-            <h2 className="text-3xl font-bold mb-4">{problem.title}</h2>
-            <p className="mb-4 text-gray-300">{problem.description}</p>
+          <div className="bg-slate-900 p-6 rounded-xl shadow-md overflow-auto max-h-[80vh]">
+            <h2 className="text-3xl font-bold mb-4 text-amber-400">{problem.title}</h2>
+            <p className="mb-4 text-slate-300">{problem.description}</p>
 
             <div className="mb-4">
-              <h3 className="text-lg font-semibold mb-2">Examples:</h3>
+              <h3 className="text-lg font-semibold mb-2 text-amber-300">Examples:</h3>
               {problem.examples.map((ex, i) => (
-                <div key={i} className="bg-gray-800 p-3 rounded mb-2">
+                <div key={i} className="bg-slate-800 p-3 rounded mb-2">
                   <div><strong>Input:</strong> {ex.input}</div>
                   <div><strong>Output:</strong> {ex.output}</div>
                 </div>
@@ -211,10 +195,10 @@ const Problem = () => {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold mb-2">Constraints:</h3>
-              <ul className="list-disc list-inside text-gray-400">
+              <h3 className="text-lg font-semibold mb-2 text-amber-300">Constraints:</h3>
+              <ul className="list-disc list-inside text-slate-400">
                 {problem.constraints
-                  .split(/[|,\n]/) // handles delimiter splitting
+                  .split(/[|,\n]/)
                   .map((c, i) => (
                     <li key={i}>{c.trim()}</li>
                   ))}

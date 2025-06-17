@@ -3,60 +3,42 @@ import Login from "./pages/Login.jsx";
 import SignUp from "./pages/SignUp.jsx";
 import Main from "./pages/Main.jsx";
 import Problem from "./pages/Problem";
-import ProtectedRoute from "./utils/protectedRoute.jsx"; // import
+import ProtectedRoute from "./utils/protectedRoute.jsx";
 import { Toaster } from "react-hot-toast";
 import Profile from "./pages/Profile.jsx";
+import Layout from "../src/Layout/UserLayout.jsx"; 
 
 const App = () => {
   return (
-   
     <Router>
-     <Toaster
+      <Toaster
         position="top-right"
         toastOptions={{
           style: {
-            background: "#1f2937", // Tailwind's bg-gray-800
+            background: "#1f2937",
             color: "#fff",
           },
         }}
-        containerStyle={{ position: 'fixed', top: 16, right: 16 }}
+        containerStyle={{ position: "fixed", top: 16, right: 16 }}
       />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
-        
-        {/* Protected Routes */}
+
+      
         <Route
-          path="/"
           element={
             <ProtectedRoute>
-              <Main />
+              <Layout />
             </ProtectedRoute>
           }
-        />
-        <Route
-          path="/problems/:id"
-          element={
-            <ProtectedRoute>
-              <Problem />
-            </ProtectedRoute>
-          }
-        />
-
-
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
-
-
+        >
+          <Route path="/" element={<Main />} />
+          <Route path="/problems/:id" element={<Problem />} />
+          <Route path="/profile" element={<Profile />} />
+        </Route>
       </Routes>
     </Router>
- 
   );
 };
 
