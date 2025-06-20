@@ -148,10 +148,7 @@ const Problem = () => {
     }
   };
 
-  const handleLogout = () => {
-    toast.success("Logged out successfully!");
-    navigate("/login");
-  };
+ 
 
   if (!problem) {
     return (
@@ -162,32 +159,25 @@ const Problem = () => {
   }
 
   return (
-    <div className="fixed inset-0 bg-slate-950 text-slate-100 flex flex-col overflow-hidden">
+    <div className=" flex flex-col text-slate-100 overflow-auto">
+
+
       {/* Top Bar */}
-      <div className="max-w-6xl w-full mx-auto flex justify-between items-center px-4 py-6">
-        <button onClick={() => navigate(-1)} className="text-teal-400 hover:underline">
-          ← Back
-        </button>
-        <button
-          onClick={handleLogout}
-          className="bg-rose-600 hover:bg-rose-700 px-4 py-2 rounded-md text-white"
-        >
-          Logout
-        </button>
-      </div>
+     
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto px-4 pb-6">
+      <div className="flex-1 px-4 pb-6 ">
+
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Problem description */}
-          <div className="bg-slate-900 p-6 rounded-xl shadow-md overflow-auto max-h-[80vh]">
+          <div className="bg-gradient-to-tr from-black via-stone-950 to-green-900 p-6 rounded-xl shadow-md overflow-auto max-h-[80vh]">
             <h2 className="text-3xl font-bold mb-4 text-amber-400">{problem.title}</h2>
             <p className="mb-4 text-slate-300">{problem.description}</p>
 
             <div className="mb-4">
               <h3 className="text-lg font-semibold mb-2 text-amber-300">Examples:</h3>
               {problem.examples.map((ex, i) => (
-                <div key={i} className="bg-slate-800 p-3 rounded mb-2">
+                <div key={i} className="bg-[#222225] p-3 rounded mb-2">
                   <div><strong>Input:</strong> {ex.input}</div>
                   <div><strong>Output:</strong> {ex.output}</div>
                 </div>
@@ -196,7 +186,7 @@ const Problem = () => {
 
             <div>
               <h3 className="text-lg font-semibold mb-2 text-amber-300">Constraints:</h3>
-              <ul className="list-disc list-inside text-slate-400">
+              <ul className="list-disc list-inside text-gray-400">
                 {problem.constraints
                   .split(/[|,\n]/)
                   .map((c, i) => (
@@ -219,6 +209,8 @@ const Problem = () => {
         </div>
       </div>
     </div>
+
+    
   );
 };
 

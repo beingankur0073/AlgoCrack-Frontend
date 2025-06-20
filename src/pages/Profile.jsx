@@ -12,6 +12,10 @@ import {
 } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { motion } from "framer-motion";
+import CalendarHeatmap from "react-calendar-heatmap";
+import "react-calendar-heatmap/dist/styles.css";
+ import { format } from 'date-fns';
+ import { Tooltip as ReactTooltip } from 'react-tooltip'
 
 
 const languageMap = {
@@ -40,6 +44,12 @@ const Profile = () => {
   const [coverLoading, setCoverLoading] = useState(false);
   const [expandedSubmissionId, setExpandedSubmissionId] = useState(null);
   const [problemStats, setProblemStats] = useState(null);
+  const [activityData, setActivityData] = useState([]);
+
+
+  const today = new Date();
+  const startDate = new Date(today);
+  startDate.setMonth(today.getMonth() - 6);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -57,6 +67,7 @@ const Profile = () => {
         const res = await axios.get("/submissions/user-submissions");
         setSubmissions(res.data.data.submissions);
         setProblemStats(res.data.data.problemStats)
+        setActivityData(res.data.data.submissionMapActivity);
       } catch (error) {
         console.error("Failed to fetch submissions:", error);
         toast.error("Failed to load submissions");
@@ -117,8 +128,8 @@ const Profile = () => {
   }
 
   return (
-    <div className="bg-gray-950 text-white h-screen overflow-y-auto py-10 px-6">
-      <div className="max-w-4xl mx-auto bg-gray-900 rounded-2xl shadow-lg">
+    <div className="pt-3 ">
+      <div className="max-w-4xl mx-auto bg-gradient-to-tr from-black via-stone-950 to-green-900 rounded-2xl shadow-lg">
         {/* Cover Image */}
         <div
           className="h-56 bg-cover bg-center cursor-pointer rounded-t-2xl relative"
@@ -189,7 +200,7 @@ const Profile = () => {
                   styles={buildStyles({
                     pathColor: getColor(parseFloat(problemStats.solvedPercentage)),
                     textColor: "#ffffff",
-                    trailColor: "#1f2937",
+                    trailColor: "#ffffff",
                     textSize: "12px",
                     pathTransitionDuration: 0.6,
                   })}
@@ -227,14 +238,7 @@ const Profile = () => {
           </div>
           
 
-          <div className="mt-6">
-            <button
-              onClick={() => navigate("/")}
-              className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md text-white font-semibold"
-            >
-              ← Back to Home
-            </button>
-          </div>
+       
 
 
 
@@ -244,87 +248,83 @@ const Profile = () => {
         </div>
 
         {/* Latest Submissions */}
-        <div className="mt-1 flex flex-col items-center ">
-          <h3 className="text-2xl font-semibold mb-4 text-center">Latest Submissions</h3>
-          {submissions.length === 0 ? (
-            <p className="text-gray-400 text-center">No submissions yet.</p>
-          ) : (
-            <div className="w-full max-w-xl mx-auto">
+            <div className="flex flex-col sm:flex-row justify-between gap-6 px-6 pb-10 mb-8">
+          {/* Latest Submissions */}
+          <div className="flex-1">
+            <h3 className="text-xl font-semibold mb-2">Latest Submissions</h3>
+            {submissions.length === 0 ? (
+              <p className="text-gray-400 text-sm">No submissions yet.</p>
+            ) : (
               <div
-                className="space-y-4 w-full max-w-xl mx-auto overflow-y-auto bg-gray-800 bg-opacity-80 rounded-xl p-6 shadow-lg"
-                style={{ maxHeight: "320px" }}
+                className="w-full"
+                style={{
+                  maxWidth: "360px",
+                  maxHeight: "260px",
+                  minHeight: "120px",
+                  overflowY: "auto",
+                  background: "rgba(31,41,55,0.8)",
+                  borderRadius: "0.5rem",
+                  padding: "0.75rem",
+                  boxShadow: "0 2px 8px 0 rgba(0,0,0,0.15)",
+                }}
               >
                 {submissions.map((sub) => (
                   <div
                     key={sub._id}
                     title="Click to open problem"
-                    className="bg-gray-900 p-4 rounded-lg shadow border border-gray-700 transition-colors"
+                    className="bg-gradient-to-tr from-neutral-950 via-gray-950 to-rose-500 p-2 rounded-md shadow border border-gray-700 transition-colors text-xs mb-2"
                   >
                     <div
                       onClick={() => navigate(`/problems/${sub.problemId}`)}
-                      className="cursor-pointer hover:bg-gray-800 p-2 rounded-md"
+                      className="cursor-pointer hover:bg-green-950 p-1 rounded"
                     >
                       <div className="flex justify-between items-center">
-                        <p className="text-lg font-bold text-white">{sub.problemTitle}</p>
+                        <p className="font-bold text-white truncate">{sub.problemTitle}</p>
                         <span
-                          className={`px-2 py-1 text-sm rounded ${
+                          className={`px-1 py-0.5 text-xs rounded ${
                             sub.status === "Accepted" ? "bg-green-600" : "bg-red-600"
                           }`}
                         >
                           {sub.status}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-400 mt-1">
-                        Difficulty:{" "}
-                        <span
-                          className={`${
-                            sub.problemDifficulty === "Easy"
-                              ? "text-green-400"
-                              : sub.problemDifficulty === "Medium"
-                              ? "text-yellow-400"
-                              : "text-red-400"
-                          }`}
-                        >
-                          {sub.problemDifficulty}
-                        </span>{" "}
-                        | Language: <span className="uppercase">{sub.language}</span> | Submitted on:{" "}
+                      <p className="text-[11px] text-gray-400 mt-0.5">
+                        Difficulty: <span className={
+                          sub.problemDifficulty === "Easy" ? "text-green-400" :
+                          sub.problemDifficulty === "Medium" ? "text-yellow-400" : "text-red-400"
+                        }>{sub.problemDifficulty}</span> |
+                        Language: <span className="uppercase">{sub.language}</span> |
                         {new Date(sub.submittedAt).toLocaleString()}
                       </p>
                     </div>
-
-                    {/* Toggle Code View */}
-                    <div className="mt-4">
+                    <div className="mt-2">
                       <button
                         onClick={() =>
                           setExpandedSubmissionId((prev) => (prev === sub._id ? null : sub._id))
                         }
-                        className="text-sm text-blue-400 hover:underline"
+                        className="text-xs text-blue-400 hover:underline"
                       >
                         {expandedSubmissionId === sub._id ? "Hide Code" : "Show Code"}
                       </button>
-
                       {expandedSubmissionId === sub._id && (
-                        <div className="relative mt-2">
-                          {/* Copy button */}
+                        <div className="relative mt-1">
                           <button
                             onClick={() => navigator.clipboard.writeText(sub.code)}
-                            className="absolute top-2 right-2 z-10 p-1 rounded hover:bg-gray-700 transition"
+                            className="absolute top-1 right-1 z-10 p-1 rounded hover:bg-gray-700 transition"
                             title="Copy to clipboard"
                           >
-                            <Copy size={16} className="text-white" />
+                            <Copy size={14} className="text-white" />
                           </button>
-
-                          {/* Code Viewer */}
                           <SyntaxHighlighter
                             language={languageMap[sub.language.toLowerCase()] || 'text'}
                             style={oneDark}
-                            showLineNumbers
+                            showLineNumbers={false}
                             wrapLongLines
                             customStyle={{
-                              borderRadius: '0.5rem',
-                              fontSize: '0.85rem',
-                              padding: '1rem',
-                              maxHeight: '16rem',
+                              borderRadius: '0.4rem',
+                              fontSize: '0.7rem',
+                              padding: '0.5rem',
+                              maxHeight: '8rem',
                               overflowY: 'auto',
                               background: '#1e1e2e',
                             }}
@@ -337,10 +337,67 @@ const Profile = () => {
                   </div>
                 ))}
               </div>
-              <div className="mt-10" /> {/* extra space after scroll area */}
+            )}
+          </div>
+
+          {/* Submission Map Placeholder */}
+         <div className="flex-1">
+            <h3 className="text-xl font-semibold mb-2">Submission Map</h3>
+            <div className="bg-gray-900 rounded-md p-3 overflow-auto">
+             <CalendarHeatmap
+  startDate={startDate}
+  endDate={today}
+  values={activityData}
+  classForValue={(value) => {
+    if (!value) return 'color-empty';
+    if (value.count >= 5) return 'color-scale-4';
+    if (value.count >= 3) return 'color-scale-3';
+    if (value.count >= 2) return 'color-scale-2';
+    if (value.count >= 1) return 'color-scale-1';
+    return 'color-empty';
+  }}
+  tooltipDataAttrs={(value) => {
+    if (!value || !value.date) {
+      return {
+        'data-tooltip-id': 'heatmap-tooltip',
+        'data-tooltip-content': 'No submissions',
+      };
+    }
+    return {
+      'data-tooltip-id': 'heatmap-tooltip',
+      'data-tooltip-content': `${format(new Date(value.date), 'MMM d, yyyy')}: ${value.count} submission(s)`,
+    };
+  }}
+  showWeekdayLabels
+/>
+<ReactTooltip id="heatmap-tooltip" effect="solid" place="top" />
+              <div className="flex gap-2 mt-2 text-xs text-gray-400">
+                <span>Less</span>
+                <div className="w-4 h-4 bg-[#22c55e33] rounded" />
+                <div className="w-4 h-4 bg-[#22c55e66] rounded" />
+                <div className="w-4 h-4 bg-[#22c55e99] rounded" />
+                <div className="w-4 h-4 bg-[#22c55e] rounded" />
+                <span>More</span>
+              </div>
+              <style>{`
+                .color-empty { fill: #1f2937; }
+                .color-scale-1 { fill: #22c55e33; }
+                .color-scale-2 { fill: #22c55e66; }
+                .color-scale-3 { fill: #22c55e99; }
+                .color-scale-4 { fill: #22c55e; }
+              `}</style>
             </div>
-          )}
+          </div>
+
+
+          
         </div>
+     
+
+
+
+
+
       </div>
     </div>
   );

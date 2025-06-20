@@ -67,52 +67,21 @@ const Main = () => {
 
 
 
-    <div className="fixed inset-0 bg-gray-950 text-white flex justify-center items-start overflow-hidden">
+    <div className="  text-white flex justify-center items-start ">
 
       <div className="w-full max-w-5xl">
         {/* Top Header Row */}
-        <div className="flex items-center justify-end mb-6 sticky top-0 z-30 bg-gray-950 py-2 px-2 mt-10">
-          
-          <h1 className="text-4xl font-bold text-blue-400 ">AlgoCrack</h1>
-
-          {/* Spacer to push to right */}
-          <div className="flex-grow" />
-
-          {/* Right section: Search | Logout | Avatar */}
-          <div className="flex items-center gap-4">
-            <input
-              type="text"
-              placeholder="Search problems..."
-              className="px-3 py-1 rounded-lg bg-gray-800 text-white border border-gray-600"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold"
-            >
-              Logout
-            </button>
-            <img
-              src={ avatarUrl}
-              alt="Profile"
-              className="w-10 h-10 rounded-full border-2 border-blue-400 cursor-pointer"
-              onClick={() => navigate("/profile")}
-            />
-          </div>
-        </div>
-
-
+       
 
 
 
 
 
         {/* Problem Table */}
-        <div className="bg-gray-900 rounded-xl shadow-md overflow-hidden">
+        <div className="bg-gradient-to-br from-black via-stone-950 to-green-900 rounded-xl shadow-md overflow-hidden">
           <div className="max-h-[70vh] overflow-y-auto">
             <table className="w-full table-auto text-left">
-              <thead className="bg-gray-800 border-b border-gray-700 sticky top-0 z-10">
+              <thead className="bg-gradient-to-tr from-neutral-950 via-gray-950 to-rose-500   sticky top-0 z-10">
                 <tr>
                   <th className="p-4">#</th>
                   <th className="p-4">Title</th>
