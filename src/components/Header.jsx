@@ -2,12 +2,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useEffect, useRef, useState } from "react";
+import ChangePasswordDialog from "./ChangePasswordDialog.jsx";
 
 const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { auth, logout } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false);
   const dropdownRef = useRef(null);
 
   const avatarUrl = auth?.user?.avatar || "https://i.pravatar.cc/40?img=3";
@@ -18,13 +20,28 @@ const Header = () => {
     navigate("/login");
   };
 
+  const handleDeleteAccount = async () => {
+    try {
+      await fetch("/users/delete", { method: "DELETE" });
+      toast.success("Account deleted successfully!");
+      logout();
+      navigate("/register");
+    } catch (err) {
+      toast.error("Failed to delete account");
+    }
+  };
+
+  const handleChangePassword = () => {
+    setShowChangePasswordDialog(true);
+  };
+
   const navItems = [
     { label: "Home", path: "/" },
     { label: "Learn", path: "/learn" },
     { label: "Profile", path: "/profile" },
+    { label: "Leaderboard", path: "/leaderboard" },
   ];
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -38,7 +55,6 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-30 bg-gradient-to-tr from-black via-stone-950 to-green-900 py-5 px-4 shadow-md mb-8">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        {/* Logo */}
         <h1
           className="sm:text-4xl leading-[1.3] bg-gradient-to-tl from-slate-500 via-green-700 to-white bg-clip-text text-transparent cursor-pointer"
           onClick={() => navigate("/")}
@@ -46,7 +62,6 @@ const Header = () => {
           AlgoCrack
         </h1>
 
-        {/* Navigation Links */}
         <nav className="flex items-center gap-6 mr-25">
           {navItems.map((item) => (
             <span
@@ -61,7 +76,6 @@ const Header = () => {
           ))}
         </nav>
 
-        {/* Avatar and Dropdown */}
         <div className="relative" ref={dropdownRef}>
           <img
             src={avatarUrl}
@@ -82,7 +96,7 @@ const Header = () => {
               </button>
               <button
                 onClick={() => {
-                  navigate("/change-password");
+                  handleChangePassword();
                   setShowDropdown(false);
                 }}
                 className="block w-full text-left px-4 py-2 hover:bg-gray-800 text-sm text-white"
@@ -91,7 +105,7 @@ const Header = () => {
               </button>
               <button
                 onClick={() => {
-                  navigate("/delete-account");
+                  handleDeleteAccount();
                   setShowDropdown(false);
                 }}
                 className="block w-full text-left px-4 py-2 hover:bg-gray-800 text-sm text-red-400"
@@ -109,6 +123,13 @@ const Header = () => {
           )}
         </div>
       </div>
+
+      {showChangePasswordDialog && (
+        <ChangePasswordDialog setShowChangePasswordDialog={setShowChangePasswordDialog}/>
+      )}
+
+
+
     </header>
   );
 };

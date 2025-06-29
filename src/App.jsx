@@ -1,12 +1,17 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "./pages/Login.jsx";
-import SignUp from "./pages/SignUp.jsx";
-import Main from "./pages/Main.jsx";
-import Problem from "./pages/Problem";
-import ProtectedRoute from "./utils/protectedRoute.jsx";
+import { lazy, Suspense } from "react";
 import { Toaster } from "react-hot-toast";
-import Profile from "./pages/Profile.jsx";
-import Layout from "../src/Layout/UserLayout.jsx"; 
+import ProtectedRoute from "./utils/protectedRoute.jsx";
+import Layout from "../src/Layout/UserLayout.jsx";
+
+// Lazy load components
+const Login = lazy(() => import("./pages/Login.jsx"));
+const SignUp = lazy(() => import("./pages/SignUp.jsx"));
+const Main = lazy(() => import("./pages/Main.jsx"));
+const Problem = lazy(() => import("./pages/Problem"));
+const Profile = lazy(() => import("./pages/Profile.jsx"));
+const Leaderboard = lazy(() => import("./pages/Leaderboard.jsx"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin.jsx"));
 
 const App = () => {
   return (
@@ -21,23 +26,26 @@ const App = () => {
         }}
         containerStyle={{ position: "fixed", top: 16, right: 16 }}
       />
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
+      <Suspense fallback={<div className="text-white text-center mt-10">Loading...</div>}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/admin-login" element={<AdminLogin />} />
 
-      
-        <Route
-          element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/" element={<Main />} />
-          <Route path="/problems/:id" element={<Problem />} />
-          <Route path="/profile" element={<Profile />} />
-        </Route>
-      </Routes>
+          <Route
+            element={
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/" element={<Main />} />
+            <Route path="/problems/:id" element={<Problem />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+          </Route>
+        </Routes>
+      </Suspense>
     </Router>
   );
 };

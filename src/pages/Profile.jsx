@@ -163,7 +163,7 @@ const Profile = () => {
               onClick={() => avatarInputRef.current.click()}
               className="cursor-pointer relative"
               title="Click to change avatar"
-              style={{ zIndex: 30 }}
+             
             >
               <img
                 src={user.avatar || "https://i.pravatar.cc/100?img=68"}
