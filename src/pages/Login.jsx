@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "../utils/api"; // your axios instance
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
+import backImg from "../assets/back.jpg";
 
 const Login = () => {
   const [username, setUsername] = useState(""); // changed from email to username
@@ -36,11 +37,18 @@ const Login = () => {
   };
 
   return (
-    <div className="h-screen flex items-center justify-center bg-gray-950 text-white px-4 overflow-hidden"
-      
+    <div className="h-screen flex items-center justify-center 
+     text-white px-4 overflow-hidden"
+       style={{
+              backgroundImage: `url(${backImg})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+            }}
     >
+      <div className="absolute inset-0 bg-gradient-to-b from-black via-black/80 to-black/40 z-0" />
 
-      <div className="w-full max-w-md p-8 rounded-2xl bg-gray-900 shadow-lg">
+      <div className="w-full max-w-md p-8 rounded-2xl bg-gray-900 shadow-lg z-30">
         <h2 className="text-3xl font-bold mb-6 text-center">Login</h2>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
