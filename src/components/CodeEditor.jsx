@@ -8,6 +8,7 @@ const CodeEditor = ({ code, setCode, handleRun, output, language, setLanguage })
     { value: "java", label: "Java" }
   ];
 
+  
   // Helper to check if output is empty
   const hasOutput = Array.isArray(output)
     ? output.length > 0 && output.some((item) => item && item.trim() !== "")
@@ -31,20 +32,36 @@ const CodeEditor = ({ code, setCode, handleRun, output, language, setLanguage })
               {lang.label}
             </option>
           ))}
+          
         </select>
       </div>
 
-      {/* Editor */}
-      <div className="bg-gray-900 p-4 rounded-xl shadow-md flex-1">
-        <Editor
-          height="400px"
-          defaultLanguage={language}
-          language={language}
-          value={code}
-          theme="vs-dark"
-          onChange={(value) => setCode(value)}
-        />
-      </div>
+      {/* Editor - Uncommented */}
+      <Editor
+        height="400px"
+       
+        language={language}
+        value={code}
+        theme="vs-dark"
+        onChange={(value) => {
+          console.log("lopp")
+          if (typeof value === "string") {
+           
+            setCode(value);
+          } else {
+          
+            console.warn("Invalid code value from Monaco:", value);
+          }
+        }}
+
+        // onMount={(editor) => {
+        //   console.log("Editor mounted:", editor);
+        // }}
+        onValidate={(markers) => {
+          if (markers.length > 0) console.warn("Validation errors:", markers);
+        }}
+        loading={<div className="text-white">Loading editor...</div>}
+      />
 
       {/* Buttons */}
       <div className="flex gap-4 justify-end">
@@ -54,7 +71,6 @@ const CodeEditor = ({ code, setCode, handleRun, output, language, setLanguage })
         >
           Submit
         </button>
-      
       </div>
 
       {/* Output */}
@@ -76,7 +92,22 @@ const CodeEditor = ({ code, setCode, handleRun, output, language, setLanguage })
                 const outputMatch = test.match(/Output:\s*(.*)/);
                 const statusMatch = test.match(/Status:\s*(.*)/);
 
-                const input = inputMatch ? inputMatch[1] : "";
+              
+                const rawInput = inputMatch ? inputMatch[1] : "";
+                let input = "";
+
+                try {
+                  const parsedInput = JSON.parse(rawInput);
+                  if (typeof parsedInput === "object" && parsedInput !== null) {
+                    input = Object.values(parsedInput).join(" ");
+                  } else {
+                    input = parsedInput;
+                  }
+                } catch {
+                  input = rawInput;
+                }
+
+
                 const expectedOutput = expectedMatch ? expectedMatch[1] : "";
                 const actualOutput = outputMatch ? outputMatch[1] : "";
                 const status = statusMatch ? statusMatch[1] : "";

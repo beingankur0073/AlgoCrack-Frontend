@@ -12,6 +12,7 @@ const Problem = lazy(() => import("./pages/Problem"));
 const Profile = lazy(() => import("./pages/Profile.jsx"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard.jsx"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin.jsx"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashBoard.jsx"));
 
 const App = () => {
   return (
@@ -43,6 +44,7 @@ const App = () => {
             <Route path="/problems/:id" element={<Problem />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
           </Route>
         </Routes>
       </Suspense>
