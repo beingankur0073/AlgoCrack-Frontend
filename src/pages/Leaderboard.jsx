@@ -8,8 +8,9 @@ const Leaderboard = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const res = await axios.get("/leaderboard");
-        setLeaders(res.data.data);
+        const res = await axios.get("/submissions/leaderboard");
+        setLeaders(res.data.data.leaderboard); 
+        
       } catch (err) {
         console.error("Failed to fetch leaderboard", err);
       } finally {
@@ -33,19 +34,26 @@ const Leaderboard = () => {
                 <th className="px-4 py-2 text-left">Rank</th>
                 <th className="px-4 py-2 text-left">User</th>
                 <th className="px-4 py-2 text-left">Solved</th>
-                <th className="px-4 py-2 text-left">Points</th>
+                <th className="px-4 py-2 text-left">Submissions</th>
               </tr>
             </thead>
             <tbody>
               {leaders.map((user, index) => (
                 <tr
-                  key={user._id}
+                  key={user.userId}
                   className={index % 2 === 0 ? "bg-gray-950" : "bg-gray-800"}
                 >
                   <td className="px-4 py-2">#{index + 1}</td>
-                  <td className="px-4 py-2 font-medium">{user.username}</td>
-                  <td className="px-4 py-2">{user.solved}</td>
-                  <td className="px-4 py-2">{user.points}</td>
+                  <td className="px-4 py-2 font-medium flex items-center">
+                    <img 
+                      src={user.avatar} 
+                      alt={user.username} 
+                      className="w-8 h-8 rounded-full mr-2"
+                    />
+                    {user.username}
+                  </td>
+                  <td className="px-4 py-2">{user.solvedProblems}</td>
+                  <td className="px-4 py-2">{user.totalSubmissions}</td>
                 </tr>
               ))}
             </tbody>

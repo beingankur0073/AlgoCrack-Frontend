@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../utils/api";
 import toast from "react-hot-toast";
+import backImg from "../assets/back.jpg";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -19,7 +20,7 @@ const AdminLogin = () => {
       console.log("Admin login response:", res.data);
 
       toast.success("Admin logged in successfully!");
-      // You can save admin token or data in localStorage/context here if needed
+      // Optionally store admin token if needed
       navigate("/admin-dashboard");
     } catch (error) {
       console.error("Admin login error:", error);
@@ -30,44 +31,55 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="h-screen flex items-center justify-center bg-gray-950 text-white px-4 overflow-hidden">
-      <div className="w-full max-w-md p-8 rounded-2xl bg-gray-900 shadow-lg">
-        <h2 className="text-3xl font-bold mb-6 text-center">Admin Login</h2>
-        <form onSubmit={handleAdminLogin} className="space-y-5">
-          <div>
-            <label htmlFor="email" className="block mb-1 text-sm font-medium">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="block mb-1 text-sm font-medium">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-          >
-            {loading ? "Logging in..." : "Login"}
-          </button>
-        </form>
+    <div
+      className="h-screen flex items-center justify-center px-4 overflow-hidden text-white relative"
+      style={{
+        backgroundImage: `url(${backImg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      <div className="absolute inset-0 bg-black/60 z-0" />
+      <div className="relative z-10 w-full max-w-md p-8 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
+        <h2 className="text-3xl font-bold mb-6 text-center text-white drop-shadow">Admin Login</h2>
+<form onSubmit={handleAdminLogin} className="space-y-5">
+  <div>
+    <label htmlFor="email" className="block mb-1 text-sm font-medium text-emerald-100">
+      Email
+    </label>
+    <input
+      id="email"
+      type="email"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+      required
+      className="w-full px-4 py-2 rounded-lg bg-white/10 border border-emerald-300/20 placeholder-emerald-100/70 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
+    />
+  </div>
+
+  <div>
+    <label htmlFor="password" className="block mb-1 text-sm font-medium text-emerald-100">
+      Password
+    </label>
+    <input
+      id="password"
+      type="password"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      required
+      className="w-full px-4 py-2 rounded-lg bg-white/10 border border-emerald-300/20 placeholder-emerald-100/70 text-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
+    />
+  </div>
+
+  <button
+    type="submit"
+    disabled={loading}
+    className="w-full bg-gradient-to-r from-yellow-400 via-emerald-500 to-yellow-400 hover:brightness-110 text-gray-900 font-semibold py-2 px-4 rounded-lg transition-all"
+  >
+    {loading ? "Logging in..." : "Login"}
+  </button>
+</form>
+
       </div>
     </div>
   );

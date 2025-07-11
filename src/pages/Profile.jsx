@@ -5,7 +5,8 @@ import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext.jsx";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { Copy } from "lucide-react";
+import { Copy, Check } from "lucide-react";
+
 import {
   CircularProgressbar,
   buildStyles
@@ -45,6 +46,8 @@ const Profile = () => {
   const [expandedSubmissionId, setExpandedSubmissionId] = useState(null);
   const [problemStats, setProblemStats] = useState(null);
   const [activityData, setActivityData] = useState([]);
+  const [copiedSubmissionId, setCopiedSubmissionId] = useState(null);
+
 
 
   const today = new Date();
@@ -55,6 +58,7 @@ const Profile = () => {
     const fetchUser = async () => {
       try {
         const res = await axios.get("/users/getuser");
+        console.log("Fetched user data:", res.data.data);
         setUser(res.data.data);
       } catch (error) {
         console.error("Failed to fetch user:", error);
@@ -247,7 +251,7 @@ const Profile = () => {
 
         </div>
 
-        {/* Latest Submissions */}
+
             <div className="flex flex-col sm:flex-row justify-between gap-6 px-6 pb-10 mb-8">
           {/* Latest Submissions */}
           <div className="flex-1">
@@ -308,12 +312,20 @@ const Profile = () => {
                       </button>
                       {expandedSubmissionId === sub._id && (
                         <div className="relative mt-1">
-                          <button
-                            onClick={() => navigator.clipboard.writeText(sub.code)}
+                         <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(sub.code);
+                              setCopiedSubmissionId(sub._id);
+                              setTimeout(() => setCopiedSubmissionId(null), 1500); // Reset after 1.5s
+                            }}
                             className="absolute top-1 right-1 z-10 p-1 rounded hover:bg-gray-700 transition"
                             title="Copy to clipboard"
                           >
-                            <Copy size={14} className="text-white" />
+                            {copiedSubmissionId === sub._id ? (
+                              <Check size={14} className="text-green-400" />
+                            ) : (
+                              <Copy size={14} className="text-white" />
+                            )}
                           </button>
                           <SyntaxHighlighter
                             language={languageMap[sub.language.toLowerCase()] || 'text'}

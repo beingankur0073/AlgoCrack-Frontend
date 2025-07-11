@@ -3,6 +3,7 @@ import { lazy, Suspense } from "react";
 import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./utils/protectedRoute.jsx";
 import Layout from "../src/Layout/UserLayout.jsx";
+import Learn from "./pages/Learn.jsx";
 
 // Lazy load components
 const Login = lazy(() => import("./pages/Login.jsx"));
@@ -44,6 +45,7 @@ const App = () => {
             <Route path="/problems/:id" element={<Problem />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/learn" element={<Learn/>} />
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
           </Route>
         </Routes>

@@ -11,6 +11,21 @@ const DEFAULT_SIGNATURES = {
   cpp: "// Write your code here (C++)"
 };
 
+const formatInput = (input) => {
+  if (typeof input === 'string') return input;
+
+  try {
+    const values = Object.values(input);
+    if (values.length === 1) {
+      return values[0]; // If only one key, show the inner value
+    }
+    return JSON.stringify(input, null, 2);
+  } catch {
+    return JSON.stringify(input);
+  }
+};
+
+
 const Problem = () => {
   const { id } = useParams();
   const [code, setCode] = useState("");
@@ -108,7 +123,7 @@ const Problem = () => {
             });
 
             const formattedResults = testCaseResults.map((test, index) =>
-              `Test Case ${index + 1}:\n  Input: ${JSON.stringify(test.input)}\n  Expected: ${test.expectedOutput}\n  Output: ${test.actualOutput?.trim()}\n  Status: ${test.status}`
+              `Test Case ${index + 1}:\n  Input: ${formatInput(test.input)}\n  Expected: ${test.expectedOutput}\n  Output: ${test.actualOutput?.trim()}\n  Status: ${test.status}`
             );
 
             setOutput([
@@ -121,7 +136,7 @@ const Problem = () => {
           if (Array.isArray(testCaseResults)) {
             const failedCase = testCaseResults.find(tc => tc.status !== "Passed");
             const formattedResults = testCaseResults.map((test, index) =>
-              `Test Case ${index + 1}:\n  Input: ${JSON.stringify(test.input)}\n  Expected: ${test.expectedOutput}\n  Output: ${test.actualOutput?.trim()}\n  Status: ${test.status}`
+              `Test Case ${index + 1}:\n  Input: ${formatInput(test.input)}\n  Expected: ${test.expectedOutput}\n  Output: ${test.actualOutput?.trim()}\n  Status: ${test.status}`
             );
             if (failedCase) {
               setOutput([
@@ -164,14 +179,14 @@ const Problem = () => {
             <p className="mb-4 text-slate-300">{problem.description}</p>
 
             <div className="mb-4">
-              <h3 className="text-lg font-semibold mb-2 text-amber-300">Examples:</h3>
-              {problem.examples.map((ex, i) => (
-                <div key={i} className="bg-slate-800 p-3 rounded mb-2">
-                  <div><strong>Input:</strong> {JSON.stringify(ex.input)}</div>
-                  <div><strong>Output:</strong> {ex.output}</div>
-                </div>
-              ))}
-            </div>
+            <h3 className="text-lg font-semibold mb-2 text-amber-300">Examples:</h3>
+            {problem.examples.map((ex, i) => (
+              <div key={i} className="bg-slate-800 p-3 rounded mb-2">
+                <div><strong>Input:</strong> {formatInput(ex.input)}</div>
+                <div><strong>Output:</strong> {ex.output}</div>
+              </div>
+            ))}
+          </div>
 
             <div>
               <h3 className="text-lg font-semibold mb-2 text-amber-300">Constraints:</h3>

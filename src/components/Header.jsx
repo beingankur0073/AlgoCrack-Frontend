@@ -40,6 +40,7 @@ const Header = () => {
     { label: "Learn", path: "/learn" },
     { label: "Profile", path: "/profile" },
     { label: "Leaderboard", path: "/leaderboard" },
+     { label: "Admin", path: "/admin-login" },
   ];
 
   useEffect(() => {
