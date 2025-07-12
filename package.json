@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "dev:local": "vite --custom-env LOCAL_API=true",
     "lint": "eslint .",
     "preview": "vite preview"
   },

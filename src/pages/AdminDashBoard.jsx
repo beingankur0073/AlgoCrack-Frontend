@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
 import axios from "../utils/api";
 import toast from "react-hot-toast";
-   import backImg from "../assets/back.jpg";
+import backImg from "../assets/back.jpg";
 import { exampleQuestion } from "../utils/constants.js";
+import { Info, Copy, Check } from "lucide-react"; 
 
 const AdminDashboard = () => {
   const [questions, setQuestions] = useState([]);
   const [users, setUsers] = useState([]);
   const [submissions, setSubmissions] = useState([]);
-  const [newQuestion, setNewQuestion] = useState({ title: "", description: "", difficulty: "Easy" });
   const [rawJsonInput, setRawJsonInput] = useState("");
+  const [showJsonExample, setShowJsonExample] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const handleRawJsonSubmit = async () => {
   try {
@@ -43,16 +45,7 @@ const AdminDashboard = () => {
     fetchData();
   }, []);
 
-  const addQuestion = async () => {
-    try {
-      await axios.post("/admin/questions", newQuestion);
-      toast.success("Question added");
-      setNewQuestion({ title: "", description: "", difficulty: "Easy" });
-      fetchData();
-    } catch (err) {
-      toast.error("Error adding question");
-    }
-  };
+
 
   const deleteQuestion = async (id) => {
     try {
@@ -91,48 +84,64 @@ const AdminDashboard = () => {
     <div className="relative z-10 p-8 space-y-10">
       <h1 className="text-4xl font-bold text-center text-emerald-400">Admin Dashboard</h1>
 
-      {/* Add Question Section */}
+    
       <div className="bg-gray-900/90 p-6 rounded-lg shadow-lg max-w-3xl mx-auto space-y-3">
-        <h2 className="text-2xl font-semibold text-yellow-400">Add New Question</h2>
-        <input
-          type="text"
-          value={newQuestion.title}
-          onChange={(e) => setNewQuestion({ ...newQuestion, title: e.target.value })}
-          placeholder="Title"
-          className="w-full p-2 rounded bg-gray-800 border border-gray-700"
-        />
-        <textarea
-          value={newQuestion.description}
-          onChange={(e) => setNewQuestion({ ...newQuestion, description: e.target.value })}
-          placeholder="Description"
-          className="w-full p-2 rounded bg-gray-800 border border-gray-700"
-        />
-        <select
-          value={newQuestion.difficulty}
-          onChange={(e) => setNewQuestion({ ...newQuestion, difficulty: e.target.value })}
-          className="w-full p-2 rounded bg-gray-800 border border-gray-700"
-        >
-          <option>Easy</option>
-          <option>Medium</option>
-          <option>Hard</option>
-        </select>
-        <button
-          onClick={addQuestion}
-          className="bg-green-600 px-4 py-2 rounded hover:bg-green-700 mt-2"
-        >
-          Add Question
-        </button>
+       
 
         {/* JSON Add Option */}
         <div className="mt-10">
           <h2 className="text-lg font-semibold text-emerald-300">Add via Raw JSON</h2>
 
-          <details className="bg-gray-800 p-4 rounded mb-2 text-green-300 text-sm whitespace-pre-wrap max-h-72 overflow-y-auto border border-gray-700">
-            <summary className="cursor-pointer text-yellow-400 font-semibold mb-2">
-              ⓘ Click to view JSON format
-            </summary>
-            <pre>{JSON.stringify(exampleQuestion, null, 2)}</pre>
-          </details>
+         <div className="relative">
+  <div className="flex items-center justify-between mb-2">
+
+    {/* Toggle JSON Preview */}
+    <button
+      onClick={() => setShowJsonExample(!showJsonExample)}
+      className="flex items-center gap-2 text-sm font-semibold text-yellow-400 hover:underline"
+    >
+      <Info size={16} /> Click to {showJsonExample ? "hide" : "view"} JSON format
+    </button>
+
+    {/* Copy JSON Button */}
+    <div className="relative group">
+      <button
+        title="Copy JSON"
+        onClick={() => {
+          navigator.clipboard.writeText(JSON.stringify(exampleQuestion, null, 2));
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        }}
+        className="p-1 rounded hover:bg-gray-700 transition"
+      >
+        <span className="sr-only">Copy</span>
+        {copied ? (
+          <Check
+            size={16}
+            className="text-green-400 transition-all duration-200 ease-in-out scale-110 opacity-100"
+          />
+        ) : (
+          <Copy
+            size={16}
+            className="text-white transition-all duration-200 ease-in-out hover:scale-105"
+          />
+        )}
+      </button>
+
+      {/* Tooltip */}
+      <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-gray-700 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+        Copy JSON
+      </div>
+    </div>
+  </div>
+
+  {/* Example JSON block */}
+  {showJsonExample && (
+    <div className="bg-gray-800 p-4 rounded text-green-300 text-sm whitespace-pre-wrap max-h-72 overflow-y-auto border border-gray-700">
+      <pre>{JSON.stringify(exampleQuestion, null, 2)}</pre>
+    </div>
+  )}
+</div>
 
           <textarea
             value={rawJsonInput}
@@ -149,6 +158,7 @@ const AdminDashboard = () => {
             Submit JSON
           </button>
         </div>
+
       </div>
 
       {/* Grid for Users, Questions, Submissions */}
