@@ -2,12 +2,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../utils/api";
 import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 import backImg from "../assets/back.jpg";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { Loader2 } from "lucide-react";
 
-// Define the schema for form validation
 const signUpSchema = z.object({
   fullName: z.string()
     .min(3, "Full name must be at least 3 characters")
@@ -16,8 +17,7 @@ const signUpSchema = z.object({
     .min(3, "Username must be at least 3 characters")
     .max(20, "Username must be less than 20 characters")
     .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers and underscores"),
-  email: z.string()
-    .email("Please enter a valid email address"),
+  email: z.string().email("Please enter a valid email address"),
   password: z.string()
     .min(6, "Password must be at least 6 characters")
     .max(50, "Password must be less than 50 characters"),
@@ -60,7 +60,7 @@ const SignUp = () => {
     try {
       setLoading(true);
       setApiError(null);
-      
+
       const form = new FormData();
       form.append("fullName", data.fullName);
       form.append("email", data.email);
@@ -100,7 +100,6 @@ const SignUp = () => {
           Create Account
         </h2>
 
-        {/* Avatar Preview */}
         <div className="flex justify-center mb-6">
           <div
             className="w-24 h-24 rounded-full border-2 border-blue-500 cursor-pointer overflow-hidden"
@@ -121,7 +120,6 @@ const SignUp = () => {
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" encType="multipart/form-data">
-          {/* Full Name */}
           <div>
             <input
               type="text"
@@ -136,7 +134,6 @@ const SignUp = () => {
             )}
           </div>
 
-          {/* Username */}
           <div>
             <input
               type="text"
@@ -151,7 +148,6 @@ const SignUp = () => {
             )}
           </div>
 
-          {/* Email */}
           <div>
             <input
               type="email"
@@ -166,7 +162,6 @@ const SignUp = () => {
             )}
           </div>
 
-          {/* Password */}
           <div>
             <input
               type="password"
@@ -181,7 +176,6 @@ const SignUp = () => {
             )}
           </div>
 
-          {/* Hidden file input */}
           <input
             id="avatarInput"
             type="file"
@@ -190,20 +184,22 @@ const SignUp = () => {
             className="hidden"
           />
 
-          {/* API Error */}
           {apiError && (
             <p className="text-red-400 text-sm text-center">
               {apiError}
             </p>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600/80 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
-          >
-            {loading ? "Creating Account..." : "Sign Up"}
-          </button>
+          <div className="w-full flex justify-center">
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-blue-600/80 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition-all shadow-md hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed text-sm flex items-center gap-2"
+            >
+              {loading && <Loader2 className="animate-spin" size={18} />}
+              {loading ? "Creating Account..." : "Sign Up"}
+            </button>
+          </div>
         </form>
 
         <p className="text-sm text-center mt-6 text-gray-300">

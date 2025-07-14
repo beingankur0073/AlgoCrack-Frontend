@@ -3,6 +3,14 @@ import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useEffect, useRef, useState } from "react";
 import ChangePasswordDialog from "./ChangePasswordDialog.jsx";
+import {
+  Home,
+  BookOpen,
+  UserCircle,
+  BarChart2,
+  ShieldCheck
+} from "lucide-react";
+import HeaderNavbar from "./HeaderNavbar.jsx";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -63,19 +71,10 @@ const Header = () => {
           AlgoCrack
         </h1>
 
-        <nav className="flex items-center gap-6 mr-25">
-          {navItems.map((item) => (
-            <span
-              key={item.label}
-              onClick={() => navigate(item.path)}
-              className={`cursor-pointer text-sm sm:text-base font-medium transition hover:text-blue-400 ${
-                location.pathname === item.path ? "text-blue-400" : "text-white"
-              }`}
-            >
-              {item.label}
-            </span>
-          ))}
-        </nav>
+    
+      <HeaderNavbar/>
+
+
 
         <div className="relative" ref={dropdownRef}>
           <img

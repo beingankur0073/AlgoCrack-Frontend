@@ -7,8 +7,8 @@ import backImg from "../assets/back.jpg";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { Loader2 } from "lucide-react";
 
-// Define the schema for form validation
 const loginSchema = z.object({
   username: z.string()
     .min(3, "Username must be at least 3 characters")
@@ -39,7 +39,7 @@ const Login = () => {
         username: data.username,
         password: data.password
       });
-      
+
       const { user, token } = res.data.data;
       login(user, token);
       toast.success(`Welcome back, ${user.username}!`);
@@ -61,17 +61,14 @@ const Login = () => {
         backgroundPosition: "center",
       }}
     >
-      {/* Overlay */}
       <div className="absolute inset-0 bg-black/60 z-0" />
 
-      {/* Glassmorphic Card */}
       <div className="relative z-10 w-full max-w-md p-8 rounded-2xl backdrop-blur-md bg-white/10 border border-white/30 shadow-xl">
         <h2 className="text-3xl font-bold mb-6 text-center text-white drop-shadow">
           Sign In
         </h2>
-        
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-white">
-          {/* Username Field */}
           <div>
             <label htmlFor="username" className="block mb-1 text-sm font-medium">
               Username
@@ -92,7 +89,6 @@ const Login = () => {
             )}
           </div>
 
-          {/* Password Field */}
           <div>
             <label htmlFor="password" className="block mb-1 text-sm font-medium">
               Password
@@ -113,13 +109,16 @@ const Login = () => {
             )}
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600/80 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-md hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
-          >
-            {loading ? "Signing in..." : "Sign In"}
-          </button>
+          <div className="w-full flex justify-center">
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-blue-600/80 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition-all shadow-md hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed text-sm flex items-center gap-2"
+            >
+              {loading ? <Loader2 className="animate-spin" size={18} /> : null}
+              {loading ? "Signing in..." : "Sign In"}
+            </button>
+          </div>
         </form>
 
         <p className="text-sm text-center mt-6 text-gray-300">
