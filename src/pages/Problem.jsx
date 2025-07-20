@@ -61,7 +61,9 @@ const Problem = () => {
 
   const handleRun = async () => {
     setOutput(["⏳ Running..."]);
-    
+    const accessToken = document.cookie.get("accessToken");
+    console.log("Running code with access token:", accessToken);
+
     try {
       const submitRes = await axios.post(
         `/submissions/${id}`,
@@ -70,7 +72,11 @@ const Problem = () => {
           language: language,
           problemId: problem._id,
         },
-       
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
       );
 
       const submissionId = submitRes.data.data.submissionId;
