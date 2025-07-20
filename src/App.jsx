@@ -4,10 +4,12 @@ import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./utils/protectedRoute.jsx";
 import Layout from "../src/Layout/UserLayout.jsx";
 import Learn from "./pages/Learn.jsx";
+import AuthPage from "./pages/Authpage.jsx";
+import AdminUsersAnalytics from "./pages/Admin/AdminUsersAnalytics.jsx";
+import AdminProblemsAnalytics from "./pages/Admin/AdminProblemsAnalytics.jsx";
 
 // Lazy load components
-const Login = lazy(() => import("./pages/Login.jsx"));
-const SignUp = lazy(() => import("./pages/SignUp.jsx"));
+
 const Main = lazy(() => import("./pages/Main.jsx"));
 const Problem = lazy(() => import("./pages/Problem"));
 const Profile = lazy(() => import("./pages/Profile.jsx"));
@@ -30,8 +32,7 @@ const App = () => {
       />
       <Suspense fallback={<div className="text-white text-center mt-10">Loading...</div>}>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
+          <Route path="/auth" element={<AuthPage />} />
           <Route path="/admin-login" element={<AdminLogin />} />
 
           <Route
@@ -47,6 +48,9 @@ const App = () => {
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/learn" element={<Learn/>} />
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/users-analytics" element={<AdminUsersAnalytics/>} />
+            <Route path="/admin/problems-analytics" element={<AdminProblemsAnalytics />} />
+
           </Route>
         </Routes>
       </Suspense>

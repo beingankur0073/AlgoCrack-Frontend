@@ -65,14 +65,8 @@ const Main = () => {
 
     <div className="  text-white flex justify-center items-start ">
 
-      <div className="w-full max-w-5xl">
-        {/* Top Header Row */}
+      <div className="w-full max-w-5xl pb-2">
        
-
-
-
-
-
         {/* Problem Table */}
         <div className="bg-gradient-to-br from-black via-stone-950 to-green-900 rounded-xl shadow-md overflow-hidden">
           <div className="max-h-[70vh] overflow-y-auto">

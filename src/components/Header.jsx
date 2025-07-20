@@ -3,18 +3,11 @@ import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useEffect, useRef, useState } from "react";
 import ChangePasswordDialog from "./ChangePasswordDialog.jsx";
-import {
-  Home,
-  BookOpen,
-  UserCircle,
-  BarChart2,
-  ShieldCheck
-} from "lucide-react";
 import HeaderNavbar from "./HeaderNavbar.jsx";
 
 const Header = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+
   const { auth, logout } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
   const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false);
@@ -25,7 +18,7 @@ const Header = () => {
   const handleLogout = () => {
     toast.success("Logged out successfully!");
     logout();
-    navigate("/login");
+    navigate("/auth");
   };
 
   const handleDeleteAccount = async () => {
@@ -62,7 +55,7 @@ const Header = () => {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 bg-gradient-to-tr from-black via-stone-950 to-green-900 py-5 px-4 shadow-md mb-8">
+    <header className="sticky top-0 z-30 bg-gradient-to-tr from-black via-stone-950 to-green-900 py-5 px-4 shadow-md mb-2">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <h1
           className="sm:text-4xl leading-[1.3] bg-gradient-to-tl from-slate-500 via-green-700 to-white bg-clip-text text-transparent cursor-pointer"
