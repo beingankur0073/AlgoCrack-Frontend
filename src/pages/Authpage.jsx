@@ -57,6 +57,7 @@ const AuthPage = () => {
         username: data.username,
         password: data.password
       });
+      console.log("Login response:", res.data); 
       const { user, token } = res.data.data;
       login(user, token);
       toast.success(`Welcome back, ${user.username}!`);
