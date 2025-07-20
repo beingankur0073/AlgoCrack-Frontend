@@ -62,6 +62,7 @@ const Problem = () => {
   const handleRun = async () => {
     setOutput(["⏳ Running..."]);
     const accessToken = localStorage.getItem("accessToken");
+    console.log("Running code with access token:", accessToken);
 
     try {
       const submitRes = await axios.post(

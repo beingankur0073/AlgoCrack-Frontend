@@ -35,7 +35,7 @@ const AuthPage = () => {
     formState: { errors: signUpErrors },
     setValue,
     trigger,
-    watch
+    
   } = useForm({ resolver: zodResolver(signUpSchema) });
 
   const [avatarPreview, setAvatarPreview] = useState(null);
