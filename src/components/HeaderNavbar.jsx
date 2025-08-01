@@ -18,7 +18,7 @@ const HeaderNavbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   return (
-    <div className="flex justify-center w-full mr-35 mt-3">
+    <div className="flex justify-center w-full  mt-3 mr-30">
       <nav className="bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-6 py-2 flex flex-wrap justify-center items-center gap-4 shadow-lg transition-all max-w-fit mx-auto">
         {navItems.map((item) => {
           const Icon =

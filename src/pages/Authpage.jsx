@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../utils/api";
-import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import backImg from "../assets/back.jpg";
 
@@ -10,8 +9,8 @@ import { useForm } from "react-hook-form";
 import { Loader2 } from "lucide-react";
 import { loginSchema, signUpSchema } from "../utils/inputValidation.js";
 
-
-
+import { useSelector, useDispatch } from "react-redux";
+import { login as loginAction, registerThunk } from "../redux/authSlice";
 
 const AuthPage = () => {
   const [mode, setMode] = useState("login");
@@ -19,13 +18,16 @@ const AuthPage = () => {
   const [apiError, setApiError] = useState(null);
 
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const dispatch = useDispatch();
+
+  // Optional: to get current auth state
+  // const auth = useSelector((state) => state.auth.auth);
 
   // Login form
   const {
     register: loginRegister,
     handleSubmit: handleLoginSubmit,
-    formState: { errors: loginErrors }
+    formState: { errors: loginErrors },
   } = useForm({ resolver: zodResolver(loginSchema) });
 
   // Sign up form
@@ -35,7 +37,6 @@ const AuthPage = () => {
     formState: { errors: signUpErrors },
     setValue,
     trigger,
-    
   } = useForm({ resolver: zodResolver(signUpSchema) });
 
   const [avatarPreview, setAvatarPreview] = useState(null);
@@ -55,11 +56,13 @@ const AuthPage = () => {
       setLoading(true);
       const res = await axios.post("/users/login", {
         username: data.username,
-        password: data.password
+        password: data.password,
       });
-      console.log("Login response:", res.data); 
-      const { user, accessToken,refreshToken } = res.data.data;
-      login(user, accessToken, refreshToken);
+      const { user, accessToken, refreshToken } = res.data.data;
+
+      // Dispatch login to Redux
+      dispatch(loginAction({ user, accessToken, refreshToken }));
+
       toast.success(`Welcome back, ${user.username}!`);
       navigate("/");
     } catch (error) {
@@ -74,6 +77,7 @@ const AuthPage = () => {
     try {
       setLoading(true);
       setApiError(null);
+
       const form = new FormData();
       form.append("fullName", data.fullName);
       form.append("email", data.email);
@@ -81,10 +85,15 @@ const AuthPage = () => {
       form.append("password", data.password);
       form.append("avatar", data.avatar);
 
-      const res = await axios.post("/users/register", form);
-      const user = res.data.data;
-      login(user, "");
-      navigate("/");
+      // Dispatch registerThunk and wait for result
+      const resultAction = await dispatch(registerThunk(form));
+
+      if (registerThunk.fulfilled.match(resultAction)) {
+        toast.success("Account created! Welcome!");
+        navigate("/");
+      } else {
+        setApiError(resultAction.payload?.message || "Registration failed. Try again.");
+      }
     } catch (error) {
       setApiError(error?.response?.data?.message || "Something went wrong");
     } finally {
@@ -104,8 +113,6 @@ const AuthPage = () => {
       <div className="absolute inset-0 bg-black/60 z-0" />
 
       <div className="relative z-10 w-full max-w-md p-8 rounded-2xl backdrop-blur-md bg-white/10 border border-white/30 shadow-xl">
-        
-
         {mode === "login" ? (
           <>
             <h2 className="text-3xl font-bold mb-6 text-center text-white drop-shadow">
@@ -126,9 +133,7 @@ const AuthPage = () => {
                   placeholder="Your username"
                 />
                 {loginErrors.username && (
-                  <p className="text-red-400 text-sm mt-1">
-                    {loginErrors.username.message}
-                  </p>
+                  <p className="text-red-400 text-sm mt-1">{loginErrors.username.message}</p>
                 )}
               </div>
 
@@ -146,9 +151,7 @@ const AuthPage = () => {
                   placeholder="Your password"
                 />
                 {loginErrors.password && (
-                  <p className="text-red-400 text-sm mt-1">
-                    {loginErrors.password.message}
-                  </p>
+                  <p className="text-red-400 text-sm mt-1">{loginErrors.password.message}</p>
                 )}
               </div>
 
@@ -190,9 +193,7 @@ const AuthPage = () => {
               </div>
             </div>
             {signUpErrors.avatar && (
-              <p className="text-red-400 text-sm text-center -mt-4 mb-4">
-                {signUpErrors.avatar.message}
-              </p>
+              <p className="text-red-400 text-sm text-center -mt-4 mb-4">{signUpErrors.avatar.message}</p>
             )}
 
             <form onSubmit={handleSignUpSubmit(onSignUp)} className="space-y-4" encType="multipart/form-data">
@@ -204,9 +205,7 @@ const AuthPage = () => {
                   className="w-full px-4 py-2 rounded-lg bg-white/20 text-white border border-white/20 placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 backdrop-blur-md"
                 />
                 {signUpErrors.fullName && (
-                  <p className="text-red-400 text-sm mt-1">
-                    {signUpErrors.fullName.message}
-                  </p>
+                  <p className="text-red-400 text-sm mt-1">{signUpErrors.fullName.message}</p>
                 )}
               </div>
               <div>
@@ -217,9 +216,7 @@ const AuthPage = () => {
                   className="w-full px-4 py-2 rounded-lg bg-white/20 text-white border border-white/20 placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 backdrop-blur-md"
                 />
                 {signUpErrors.username && (
-                  <p className="text-red-400 text-sm mt-1">
-                    {signUpErrors.username.message}
-                  </p>
+                  <p className="text-red-400 text-sm mt-1">{signUpErrors.username.message}</p>
                 )}
               </div>
               <div>
@@ -230,9 +227,7 @@ const AuthPage = () => {
                   className="w-full px-4 py-2 rounded-lg bg-white/20 text-white border border-white/20 placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 backdrop-blur-md"
                 />
                 {signUpErrors.email && (
-                  <p className="text-red-400 text-sm mt-1">
-                    {signUpErrors.email.message}
-                  </p>
+                  <p className="text-red-400 text-sm mt-1">{signUpErrors.email.message}</p>
                 )}
               </div>
               <div>
@@ -243,9 +238,7 @@ const AuthPage = () => {
                   className="w-full px-4 py-2 rounded-lg bg-white/20 text-white border border-white/20 placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-400 backdrop-blur-md"
                 />
                 {signUpErrors.password && (
-                  <p className="text-red-400 text-sm mt-1">
-                    {signUpErrors.password.message}
-                  </p>
+                  <p className="text-red-400 text-sm mt-1">{signUpErrors.password.message}</p>
                 )}
               </div>
               <input
@@ -257,9 +250,7 @@ const AuthPage = () => {
               />
 
               {apiError && (
-                <p className="text-red-400 text-sm text-center">
-                  {apiError}
-                </p>
+                <p className="text-red-400 text-sm text-center">{apiError}</p>
               )}
               <div className="w-full flex justify-center">
                 <button

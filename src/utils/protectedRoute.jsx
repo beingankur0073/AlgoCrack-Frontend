@@ -1,16 +1,18 @@
 // components/ProtectedRoute.jsx
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useSelector } from "react-redux";
 
 const ProtectedRoute = ({ children }) => {
-  const { auth } = useAuth();
+  // Access auth state from Redux store
+  const auth = useSelector((state) => state.auth.auth);
 
   if (!auth) {
-    // If not logged in, redirect to login
+    // If not logged in, redirect to login page
     return <Navigate to="/auth" replace />;
   }
 
-  return children; // If logged in, show the component
+  // If logged in, render the child components
+  return children;
 };
 
 export default ProtectedRoute;
