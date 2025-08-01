@@ -3,7 +3,7 @@ import { getColor } from "../utils/colorFunc.js";
 import axios from "../utils/api"; 
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { setProblems, setSelectedProblem } from "../redux/problemSlice";
+import { fetchProblems, setProblems, setSelectedProblem } from "../redux/problemSlice";
 import { logout } from "../redux/authSlice";
 
 const difficultyOrder = { Easy: 1, Medium: 2, Hard: 3 };
@@ -25,17 +25,10 @@ const Main = () => {
   const [sortAsc, setSortAsc] = useState(true);
 
   useEffect(() => {
-    const fetchProblems = async () => {
-      try {
-        const res = await axios.get("/problems");
-        dispatch(setProblems(res.data.data));
-        setFiltered(res.data.data);
-      } catch (error) {
-        console.error("Failed to fetch problems:", error);
-      }
-    };
-    fetchProblems();
-  }, [dispatch]);
+    if (!problems || problems.length === 0) {
+      dispatch(fetchProblems());
+    }
+  }, [dispatch, problems]);
 
   useEffect(() => {
     if (searchTerm === "") {

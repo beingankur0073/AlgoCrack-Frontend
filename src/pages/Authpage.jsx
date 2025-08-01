@@ -10,7 +10,7 @@ import { Loader2 } from "lucide-react";
 import { loginSchema, signUpSchema } from "../utils/inputValidation.js";
 
 import { useSelector, useDispatch } from "react-redux";
-import { login as loginAction, registerThunk } from "../redux/authSlice";
+import { loginThunk, registerThunk } from "../redux/authSlice";
 
 const AuthPage = () => {
   const [mode, setMode] = useState("login");
@@ -19,9 +19,6 @@ const AuthPage = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  // Optional: to get current auth state
-  // const auth = useSelector((state) => state.auth.auth);
 
   // Login form
   const {
@@ -50,29 +47,35 @@ const AuthPage = () => {
     }
   };
 
-  // LOGIN
+  // LOGIN using loginThunk
   const onLogin = async (data) => {
     try {
       setLoading(true);
-      const res = await axios.post("/users/login", {
+      setApiError(null);
+      // Dispatch loginThunk with username and password
+      const resultAction = await dispatch(loginThunk({
         username: data.username,
-        password: data.password,
-      });
-      const { user, accessToken, refreshToken } = res.data.data;
+        password: data.password
+      }));
 
-      // Dispatch login to Redux
-      dispatch(loginAction({ user, accessToken, refreshToken }));
-
-      toast.success(`Welcome back, ${user.username}!`);
-      navigate("/");
+      if (loginThunk.fulfilled.match(resultAction)) {
+        const user = resultAction.payload?.user || data.username; // you can modify as needed
+        toast.success(`Welcome back!`);
+        navigate("/");
+      } else {
+        // resultAction.payload contains the error message from thunk rejectWithValue
+        setApiError(resultAction.payload?.message || "Invalid username or password");
+        toast.error(resultAction.payload?.message || "Invalid username or password");
+      }
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Invalid username or password");
+      toast.error("Unexpected error during login");
     } finally {
       setLoading(false);
     }
   };
 
-  // SIGN UP
+  // SIGN UP remains unchanged, still uses registerThunk
+
   const onSignUp = async (data) => {
     try {
       setLoading(true);
@@ -85,7 +88,6 @@ const AuthPage = () => {
       form.append("password", data.password);
       form.append("avatar", data.avatar);
 
-      // Dispatch registerThunk and wait for result
       const resultAction = await dispatch(registerThunk(form));
 
       if (registerThunk.fulfilled.match(resultAction)) {
@@ -154,6 +156,10 @@ const AuthPage = () => {
                   <p className="text-red-400 text-sm mt-1">{loginErrors.password.message}</p>
                 )}
               </div>
+
+              {apiError && (
+                <p className="text-red-400 text-sm text-center mb-2">{apiError}</p>
+              )}
 
               <div className="w-full flex justify-center">
                 <button

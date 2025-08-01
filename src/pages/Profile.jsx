@@ -3,7 +3,8 @@ import axios from "../utils/api";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useSelector, useDispatch } from "react-redux";
-import { updateUser as updateUserAction } from "../redux/authSlice";
+import { updateUser as updateUserAuth } from "../redux/authSlice";
+import { fetchProfileData, updateUser as updateUserProfile } from "../redux/profileSlice";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Copy, Check } from "lucide-react";
@@ -36,62 +37,50 @@ const getColor = (percentage) => {
 
 const Profile = () => {
   const dispatch = useDispatch();
-  const auth = useSelector((state) => state.auth.auth);
   const navigate = useNavigate();
 
-  // Use user from Redux auth state
-  const [user, setUser] = useState(null);
-  // For local edits (like avatar, cover updates) keep local user separately
-  // but keep it in sync with Redux `auth.user` to keep UI immediate
+  // Get profile data from Redux store
+  const { user, submissions, problemStats, activityData, loading, error } = useSelector(state => state.profile);
+  const auth = useSelector(state => state.auth.auth);
+
+  // Local loading states for avatar and cover uploads
+  const [avatarLoading, setAvatarLoading] = useState(false);
+  const [coverLoading, setCoverLoading] = useState(false);
+
+  // UI states for expanded submissions, copy feedback, input refs
+  const [expandedSubmissionId, setExpandedSubmissionId] = useState(null);
+  const [copiedSubmissionId, setCopiedSubmissionId] = useState(null);
 
   const avatarInputRef = useRef(null);
   const coverInputRef = useRef(null);
-
-  const [submissions, setSubmissions] = useState([]);
-  const [avatarLoading, setAvatarLoading] = useState(false);
-  const [coverLoading, setCoverLoading] = useState(false);
-  const [expandedSubmissionId, setExpandedSubmissionId] = useState(null);
-  const [problemStats, setProblemStats] = useState(null);
-  const [activityData, setActivityData] = useState([]);
-  const [copiedSubmissionId, setCopiedSubmissionId] = useState(null);
 
   const today = new Date();
   const startDate = new Date(today);
   startDate.setMonth(today.getMonth() - 6);
 
-  // Sync user state with Redux auth user when available or changes
+  // Fetch profile data only if not already present in Redux
   useEffect(() => {
-    if (auth?.user) {
-      setUser(auth.user);
+    if (!user) {
+      dispatch(fetchProfileData())
+        .unwrap()
+        .catch((err) => {
+          toast.error(err);
+        });
     }
-  }, [auth]);
+  }, [dispatch, user]);
 
-  useEffect(() => {
-    const fetchUserDetails = async () => {
-      try {
-        const res = await axios.get("/users/getuser");
-        setUser(res.data.data);
-      } catch (error) {
-        console.error("Failed to fetch user:", error);
-        toast.error("Failed to load profile");
-      }
-    };
+  // Keep auth user synced with profile user data (avatar etc.)
+ useEffect(() => {
+  if (user && auth && user._id === auth.user?._id) {
+    // Only update if there really is a difference in avatar or other fields, e.g.:
+    if (user.avatar !== auth.user.avatar) {
+      dispatch(updateUserAuth({ avatar: user.avatar }));
+    }
+    // add other field comparisons as truly needed...
+  }
+  // NO dependency on auth!
+}, [dispatch, user]);
 
-    const fetchSubmissions = async () => {
-      try {
-        const res = await axios.get("/submissions/user-submissions");
-        setSubmissions(res.data.data.submissions);
-        setProblemStats(res.data.data.problemStats);
-        setActivityData(res.data.data.submissionMapActivity);
-      } catch (error) {
-        console.error("Failed to fetch submissions:", error);
-        toast.error("Failed to load submissions");
-      }
-    };
-
-    fetchUserDetails();
-    fetchSubmissions();
-  }, []);
 
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
@@ -103,10 +92,12 @@ const Profile = () => {
     try {
       setAvatarLoading(true);
       const res = await axios.patch("/users/updateAvatar", formData);
-      // Update local user state
-      setUser((prev) => ({ ...prev, avatar: res.data.data.avatar }));
-      // Update Redux auth user for global state consistency
-      dispatch(updateUserAction({ avatar: res.data.data.avatar }));
+
+      // Update Redux profile user
+      dispatch(updateUserProfile({ avatar: res.data.data.avatar }));
+      // Update Redux auth user for consistency
+      dispatch(updateUserAuth({ avatar: res.data.data.avatar }));
+      
       toast.success("Avatar updated successfully");
     } catch (err) {
       console.error("Error updating avatar", err);
@@ -126,7 +117,10 @@ const Profile = () => {
     try {
       setCoverLoading(true);
       const res = await axios.patch("/users/updateCover", formData);
-      setUser((prev) => ({ ...prev, coverImage: res.data.data.coverImage }));
+
+      // Update Redux profile user cover image
+      dispatch(updateUserProfile({ coverImage: res.data.data.coverImage }));
+
       toast.success("Cover image updated successfully");
     } catch (err) {
       console.error("Error updating cover", err);
@@ -136,12 +130,24 @@ const Profile = () => {
     }
   };
 
-  if (!user) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
         <p className="text-xl text-gray-400">Loading profile...</p>
       </div>
     );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
+        <p className="text-xl text-red-400">Failed to load profile: {error}</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
   }
 
   return (
@@ -245,8 +251,7 @@ const Profile = () => {
               <strong>Email:</strong> {user.email}
             </p>
             <p className="text-gray-300 mt-2">
-              <strong>Member Since:</strong>{" "}
-              {new Date(user.createdAt).toLocaleDateString()}
+              <strong>Member Since:</strong> {new Date(user.createdAt).toLocaleDateString()}
             </p>
           </div>
         </div>
