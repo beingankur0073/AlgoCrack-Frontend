@@ -155,7 +155,7 @@ const Profile = () => {
       <div className="max-w-4xl mx-auto bg-gradient-to-tr from-black via-stone-950 to-green-900 rounded-2xl shadow-lg">
         {/* Cover Image */}
         <div
-          className="h-56 bg-cover bg-center cursor-pointer rounded-t-2xl relative"
+          className="h-56 bg-cover bg-center cursor-pointer rounded-t-2xl relative z-0"
           style={{
             backgroundImage: `url(${
               user.coverImage ||
@@ -166,7 +166,7 @@ const Profile = () => {
           title="Click to change cover image"
         >
           {coverLoading && (
-            <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 rounded-t-2xl z-10">
+            <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 rounded-t-2xl">
               <div className="loader border-4 border-white border-t-transparent rounded-full w-10 h-10 animate-spin" />
             </div>
           )}
@@ -181,7 +181,7 @@ const Profile = () => {
 
         {/* Profile Info */}
         <div className="p-6">
-          <div className="flex items-center gap-4 -mt-16 relative">
+          <div className="flex items-center gap-4 -mt-16 relative ">
             <div
               onClick={() => avatarInputRef.current.click()}
               className="cursor-pointer relative"
@@ -190,7 +190,7 @@ const Profile = () => {
               <img
                 src={user.avatar || "https://i.pravatar.cc/100?img=68"}
                 alt="avatar"
-                className="w-32 h-32 rounded-full border-4 border-gray-900 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105"
+                className="w-32 h-32 rounded-full border-4 border-gray-900 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 z-40"
               />
               {avatarLoading && (
                 <div className="absolute top-0 left-0 w-32 h-32 flex items-center justify-center bg-black bg-opacity-50 rounded-full z-10">

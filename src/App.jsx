@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./utils/protectedRoute.jsx";
-import Layout from "../src/Layout/UserLayout.jsx";
+import Layout from "./Layout/Layout.jsx";
 import Learn from "./pages/Learn.jsx";
 import AuthPage from "./pages/Authpage.jsx";
 import AdminUsersAnalytics from "./pages/Admin/AdminUsersAnalytics.jsx";

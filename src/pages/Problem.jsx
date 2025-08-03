@@ -1,35 +1,19 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams} from "react-router-dom";
 import { useEffect, useState } from "react";
 import CodeEditor from "../components/CodeEditor.jsx";
 import axios from "../utils/api";
-import confetti from 'canvas-confetti';
 import toast from "react-hot-toast";
+import { formatInput } from "../utils/inputFormat.js";
 
-const DEFAULT_SIGNATURES = {
-  javascript: "// Write your code here (JS)",
-  python: "# Write your code here (Python)",
-  cpp: "// Write your code here (C++)"
-};
 
-const formatInput = (input) => {
-  if (typeof input === 'string') return input;
 
-  try {
-    const values = Object.values(input);
-    if (values.length === 1) {
-      return values[0]; // If only one key, show the inner value
-    }
-    return JSON.stringify(input, null, 2);
-  } catch {
-    return JSON.stringify(input);
-  }
-};
+
 
 
 const Problem = () => {
   const { id } = useParams();
-  const [code, setCode] = useState("");
-  const [output, setOutput] = useState([]);
+ 
+ 
   const [problem, setProblem] = useState(null);
   const [language, setLanguage] = useState("cpp");
 
@@ -40,7 +24,7 @@ const Problem = () => {
         const data = res.data.data;
         setProblem(data);
 
-        const sig = data.boilerplateCode?.[language] || DEFAULT_SIGNATURES[language];
+        const sig = DEFAULT_SIGNATURES[language];
      //   console.log(sig);
       //  console.log ( typeof data.boilerplateCode['cpp'])
         setCode(sig);
@@ -52,115 +36,8 @@ const Problem = () => {
     fetchProblem();
   }, [id]);
 
-  useEffect(() => {
-    if (problem) {
-      const sig = problem.boilerplateCode?.[language] || DEFAULT_SIGNATURES[language];
-      setCode(sig);
-    }
-  }, [language]);
-
-  const handleRun = async () => {
-    setOutput(["⏳ Running..."]);
-    const accessToken = localStorage.getItem("accessToken");
-    console.log("Running code with access token:", accessToken);
-
-    try {
-      const submitRes = await axios.post(
-        `/submissions/${id}`,
-        {
-          code,
-          language: language,
-          problemId: problem._id,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      const submissionId = submitRes.data.data.submissionId;
-
-      const pollResult = async (retry = 0) => {
-        try {
-          const res = await axios.get(`/submissions/${submissionId}`, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
-            },
-          });
-
-          const {
-            status,
-            testCaseResults,
-            compileOutput,
-            stderr,
-          } = res.data.data;
-
-          if (status === "Pending" || status === "Processing") {
-            if (retry < 10) {
-              setTimeout(() => pollResult(retry + 1), 1500);
-            } else {
-              setOutput(["⏳ Timeout: Judging took too long."]);
-            }
-            return;
-          }
-
-          if (status === "Compilation Error") {
-            setOutput([`❌ Compilation Error:\n${compileOutput || "No compilation output."}`]);
-            return;
-          }
-
-          if (status === "Runtime Error") {
-            setOutput([`❌ Runtime Error:\n${stderr || "No runtime error output."}`]);
-            return;
-          }
-
-          if (status === "Accepted") {
-            confetti({
-              particleCount: 150,
-              spread: 90,
-              origin: { y: 0.6 },
-            });
-
-            const formattedResults = testCaseResults.map((test, index) =>
-              `Test Case ${index + 1}:\n  Input: ${formatInput(test.input)}\n  Expected: ${test.expectedOutput}\n  Output: ${test.actualOutput?.trim()}\n  Status: ${test.status}`
-            );
-
-            setOutput([
-              `🎉 Accepted! All test cases passed.`,
-              ...formattedResults
-            ]);
-            return;
-          }
-
-          if (Array.isArray(testCaseResults)) {
-            const failedCase = testCaseResults.find(tc => tc.status !== "Passed");
-            const formattedResults = testCaseResults.map((test, index) =>
-              `Test Case ${index + 1}:\n  Input: ${formatInput(test.input)}\n  Expected: ${test.expectedOutput}\n  Output: ${test.actualOutput?.trim()}\n  Status: ${test.status}`
-            );
-            if (failedCase) {
-              setOutput([
-                `❌ ${status} on a test case:`,
-                ...formattedResults
-              ]);
-            } else {
-              setOutput([`❌ ${status}. No failed test case data available.`, ...formattedResults]);
-            }
-          } else {
-            setOutput([`❌ ${status}. Test case results not available.`]);
-          }
-        } catch (err) {
-          setOutput([`❌ Error while fetching result: ${err.response?.data?.message || err.message || 'Unknown error'}.`]);
-        }
-      };
-
-      pollResult();
-    } catch (err) {
-      console.error("❌ Submission failed:", err);
-      setOutput(`❌ Submission failed: ${err.response?.data?.message || err.message || 'Unknown error'}.`);
-    }
-  };
+  
+ 
 
   if (!problem) {
     return (
@@ -202,14 +79,13 @@ const Problem = () => {
 
           {/* Code editor and output */}
           <CodeEditor
-            code={code}
-            setCode={setCode}
-            handleRun={handleRun}
-            output={output}
+            id={id}
+            problem={problem}
             language={language}
             setLanguage={setLanguage}
           />
         </div>
+
       </div>
     </div>
   );

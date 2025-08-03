@@ -7,16 +7,8 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
 
   return (
-    <div
-      className="relative min-h-screen flex items-center justify-center"
-      style={{
-        backgroundImage: `url(${backImg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-black/80 to-black/60 z-0" />
+ 
+     
       <div className="relative z-10 flex flex-col items-center w-full max-w-2xl mx-auto pt-16">
         <h1 className="text-4xl font-bold text-emerald-400 mb-10 text-center">Admin Dashboard</h1>
         <div className="flex flex-col md:flex-row gap-8 w-full justify-center">
@@ -40,7 +32,7 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
-    </div>
+  
   );
 };
 

@@ -39,12 +39,7 @@ const AdminUsersAnalytics = () => {
   }));
 
   return (
-    <div className="relative min-h-screen" style={{
-      backgroundImage: `url(${backImg})`,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-    }}>
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-black/80 to-black/60 z-0" />
+  
       <div className="relative z-10 p-8 max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-6 text-cyan-300">User Analytics</h1>
 
@@ -88,7 +83,7 @@ const AdminUsersAnalytics = () => {
         </div>
 
       </div>
-    </div>
+   
   );
 };
 

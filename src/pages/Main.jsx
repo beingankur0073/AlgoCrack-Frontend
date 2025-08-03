@@ -30,6 +30,10 @@ const Main = () => {
     }
   }, [dispatch, problems]);
 
+
+
+  
+
   useEffect(() => {
     if (searchTerm === "") {
       setFiltered(problems);
@@ -41,6 +45,8 @@ const Main = () => {
       );
     }
   }, [searchTerm, problems]);
+
+
 
   const sortByDifficulty = () => {
     const sorted = [...filtered].sort((a, b) =>

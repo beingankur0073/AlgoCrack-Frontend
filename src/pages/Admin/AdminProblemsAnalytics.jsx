@@ -115,16 +115,7 @@ const AdminProblemsAnalytics = () => {
   const { languageData = [], statusData = [] } = prepareChartData();
 
   return (
-    <div
-      className="relative text-white min-h-screen"
-      style={{
-        backgroundImage: `url(${backImg})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-black/80 to-black/60 z-0" />
+   
       <div className="relative z-10 pr-8 pl-8 pb-8 pt-0.5 space-y-8 max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold text-center text-amber-400 mb-8">
           Problems & Submissions Analytics
@@ -360,7 +351,7 @@ const AdminProblemsAnalytics = () => {
           )}
         </div>
       </div>
-    </div>
+
   );
 };
 
