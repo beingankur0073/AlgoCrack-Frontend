@@ -1,28 +1,26 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from '../utils/api';
 
+// Get initial user info from localStorage (no tokens stored here)
 const getInitialAuth = () => {
   try {
     const userRaw = localStorage.getItem("user");
-    const accessToken = localStorage.getItem("accessToken");
-    const refreshToken = localStorage.getItem("refreshToken");
-    if (!userRaw || !accessToken || !refreshToken || userRaw === "undefined") return null;
-    const user = JSON.parse(userRaw);
-    return { user, accessToken, refreshToken };
+    if (!userRaw || userRaw === "undefined") return null;
+    return { user: JSON.parse(userRaw) };
   } catch {
     localStorage.clear();
     return null;
   }
 };
 
-
+// Async thunk examples remain similar but do not store tokens in state/localStorage explicitly
 export const registerThunk = createAsyncThunk(
   'auth/register',
   async (formData, { dispatch, rejectWithValue }) => {
     try {
       const res = await axios.post("/users/register", formData);
-      const { user, accessToken, refreshToken } = res.data.data;
-      dispatch(login({ user, accessToken, refreshToken }));
+      const { user } = res.data.data;  // tokens managed by cookies, not returned/stored
+      dispatch(login({ user }));
       return { success: true };
     } catch (error) {
       return rejectWithValue({
@@ -33,14 +31,13 @@ export const registerThunk = createAsyncThunk(
   }
 );
 
-// New async thunk for login
 export const loginThunk = createAsyncThunk(
   'auth/login',
   async ({ username, password }, { dispatch, rejectWithValue }) => {
     try {
       const res = await axios.post("/users/login", { username, password });
-      const { user, accessToken, refreshToken } = res.data.data;
-      dispatch(login({ user, accessToken, refreshToken }));
+      const { user } = res.data.data;  // tokens handled automatically by cookies
+      dispatch(login({ user }));
       return { success: true };
     } catch (error) {
       return rejectWithValue({
@@ -56,17 +53,14 @@ const authSlice = createSlice({
   initialState: { auth: getInitialAuth() },
   reducers: {
     login: (state, action) => {
-      const { user, accessToken, refreshToken } = action.payload;
+      const { user } = action.payload;
       localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
-      state.auth = { user, accessToken, refreshToken };
+      state.auth = { user };
     },
     logout: (state) => {
       localStorage.removeItem("user");
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
       state.auth = null;
+      // Tokens and cookies handled by backend, no localStorage cleanup needed beyond user
     },
     updateUser: (state, action) => {
       if (state.auth && state.auth.user) {
@@ -78,10 +72,10 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(registerThunk.rejected, (state, action) => {
-        // Handle registration error state if you want
+        // Optionally handle errors
       })
       .addCase(loginThunk.rejected, (state, action) => {
-        // Handle login error state if you want
+        // Optionally handle errors
       });
   }
 });
