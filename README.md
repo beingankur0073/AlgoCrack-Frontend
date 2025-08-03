@@ -1,12 +1,12 @@
-# React + Vite
+# Project Title
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A web-based platform designed to streamline workflow management for small teams. This project allows users to create, assign, and track tasks in real-time, ensuring better collaboration and transparency across projects. Key features include user authentication, role-based access, deadline notifications, and a responsive dashboard optimized for both desktop and mobile use. The system aims to enhance productivity by providing an intuitive interface and integrated communication tools.
 
-Currently, two official plugins are available:
+## Video Demonstration
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Here is a video demonstrating the project:
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+<video width="640" height="360" controls>
+  <source src="path/to/your-video.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
