@@ -1,14 +1,11 @@
-import React from "react";
+
 import { useNavigate } from "react-router-dom";
-import backImg from "../assets/back.jpg";
 import { Users, BarChart4 } from "lucide-react";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
 
   return (
- 
-     
       <div className="relative z-10 flex flex-col items-center w-full max-w-2xl mx-auto pt-16">
         <h1 className="text-4xl font-bold text-emerald-400 mb-10 text-center">Admin Dashboard</h1>
         <div className="flex flex-col md:flex-row gap-8 w-full justify-center">

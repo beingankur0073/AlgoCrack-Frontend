@@ -2,7 +2,7 @@ import React from 'react'
 
 const Learn = () => {
   return (
-    <div>Learn</div>
+    <div>Learn page coming soon !!!</div>
   )
 }
 

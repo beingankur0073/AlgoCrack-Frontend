@@ -1,13 +1,21 @@
 export const formatInput = (input) => {
-  if (typeof input === 'string') return input;
-
-  try {
-    const values = Object.values(input);
-    if (values.length === 1) {
-      return values[0]; // If only one key, show the inner value
-    }
-    return JSON.stringify(input, null, 2);
-  } catch {
-    return JSON.stringify(input);
+  // Return the input directly if it's already a simple value (string, number, etc.).
+  if (typeof input !== 'object' || input === null) {
+    return String(input);
   }
+
+  // Handle arrays explicitly.
+  if (Array.isArray(input)) {
+    return `[${input.join(', ')}]`;
+  }
+
+  // Check if the object has exactly one key.
+  const keys = Object.keys(input);
+  if (keys.length === 1) {
+    // If so, return the value of that key directly for a cleaner display.
+    return formatInput(input[keys[0]]);
+  }
+
+  // For all other objects (with multiple keys), return a formatted JSON string.
+  return JSON.stringify(input, null, 2);
 };
