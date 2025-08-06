@@ -51,7 +51,7 @@
 | Redux (State Management)         | Express.js            | Vercel (Frontend host)|
 | Tailwind CSS (Styling)           | MongoDB               | Cloudinary (Media)    |
 | Framer Motion (Animations)       | JWT (Auth)            | GitHub (Code Repo)    |
-| React Query (API Caching)        |                       |                       |
+| React Query (API Caching)        |                       | Judge0 Api            |
 | Monaco Editor (Code Editor)      |                       |                       |
 | PrismJS (Syntax Highlighting)    |                       |                       |
 
@@ -79,10 +79,8 @@
   
   Example (YouTube Markdown Embed):
 
-[![Watch the demo](https://img.youtube
+[(https://www.youtube.com/watch?v=C0J3nvFO2Ok&autoplay=1)]
 
-text
-*(Replace `<VIDEO_ID>` with your actual YouTube video ID)*
 
 ---
 
@@ -206,7 +204,7 @@ The frontend will usually run on `http://localhost:3000` and the backend on the 
 
 ## 👤 Author
 
-**[Your Name]**  
+**Ankur Mukherjee**  
 [Your LinkedIn Profile](#) | [Your Personal Website](#)
 
 ---
