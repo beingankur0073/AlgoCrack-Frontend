@@ -10,3 +10,15 @@
   border-style: solid;
   border-radius: 9999px;
 }
+
+.radial-blur-bg {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ff80b5 0%, #f6d365 100%);
+  filter: blur(2px);
+  opacity: 0.8;
+  pointer-events: none;
+  z-index: 0;
+}

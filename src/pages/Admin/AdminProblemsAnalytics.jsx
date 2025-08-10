@@ -118,7 +118,7 @@ const AdminProblemsAnalytics = () => {
    
       <div className="relative z-10 pr-8 pl-8 pb-8 pt-0.5 space-y-8 max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold text-center text-amber-400 mb-8">
-          Problems & Submissions Analytics
+          Problems Analytics
         </h1>
 
         {/* Stats Overview */}

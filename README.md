@@ -87,7 +87,7 @@
 ## 🌐 Live Demo
 
 [**Visit AlgoCrack Live**](#)  
-*Replace the above link with the actual deployed URL once available.*
+
 
 ---
 
@@ -205,7 +205,7 @@ The frontend will usually run on `http://localhost:3000` and the backend on the 
 ## 👤 Author
 
 **Ankur Mukherjee**  
-[Your LinkedIn Profile](#) | [Your Personal Website](#)
+[https://www.linkedin.com/in/ankur73](#) | [Your Personal Website](#)
 
 ---
 
