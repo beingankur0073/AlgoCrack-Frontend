@@ -1,18 +1,31 @@
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchLeaderboard } from '../redux/leaderboardSlice';
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchLeaderboard } from "../../redux/leaderboardSlice";
+import "../../animations.css";
+
 
 const Leaderboard = () => {
   const dispatch = useDispatch();
   const { leaders, loading, error } = useSelector((state) => state.leaderboard);
 
+  // Animation control
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     dispatch(fetchLeaderboard());
   }, [dispatch]);
 
+
+
+
+
   return (
-    <div className="max-w-4xl mx-auto p-6 text-white">
+    <div className="max-w-4xl mx-auto p-6 text-white animate-fadeInUp">
       <h1 className="text-3xl font-bold mb-6 text-center">🏆 Leaderboard</h1>
+
       {loading ? (
         <p className="text-center text-gray-400">Loading...</p>
       ) : error ? (
@@ -32,7 +45,12 @@ const Leaderboard = () => {
               {leaders.map((user, index) => (
                 <tr
                   key={user.userId}
-                  
+                  className={`border-b border-gray-800 transition-colors duration-300 
+                    ${mounted ? "animate-fadeInRow" : ""}
+                    hover:bg-gradient-to-r hover:from-[#132c21] hover:via-[#111821] hover:to-[#28131f]`}
+                  style={{
+                    animationDelay: `${index * 45}ms`,
+                  }}
                 >
                   <td className="px-4 py-2">#{index + 1}</td>
                   <td className="px-4 py-2 font-medium flex items-center">

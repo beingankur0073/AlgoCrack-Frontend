@@ -1,22 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import axios from "../utils/api";
+import axios from "../../utils/api.js";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useSelector, useDispatch } from "react-redux";
-import { updateUser as updateUserAuth } from "../redux/authSlice";
-import { fetchProfileData, updateUser as updateUserProfile } from "../redux/profileSlice";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Copy, Check } from "lucide-react";
+import { updateUser as updateUserAuth } from "../../redux/authSlice.js";
+import { fetchProfileData, updateUser as updateUserProfile } from "../../redux/profileSlice.js";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { motion } from "framer-motion";
-import CalendarHeatmap from "react-calendar-heatmap";
 import "react-calendar-heatmap/dist/styles.css";
-import { format } from "date-fns";
-import { Tooltip as ReactTooltip } from "react-tooltip";
-import LatestSubmissions from "../components/profilePage/LatestSubmission.jsx";
-import SubmissionMap from "../components/profilePage/SubmissionMap.jsx";
+import LatestSubmissions from "../../components/profilePage/LatestSubmission.jsx";
+import SubmissionMap from "../../components/profilePage/SubmissionMap.jsx";
 
 
 const getColor = (percentage) => {

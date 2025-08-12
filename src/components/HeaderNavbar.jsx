@@ -7,7 +7,7 @@ import {
   ShieldCheck
 } from "lucide-react";
 const navItems = [
-  { label: "Home", path: "/" },
+  { label: "Home", path: "/main" },
   { label: "Learn", path: "/learn" },
   { label: "Profile", path: "/profile" },
   { label: "Leaderboard", path: "/leaderboard" },

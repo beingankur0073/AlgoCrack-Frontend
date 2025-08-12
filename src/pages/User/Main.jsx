@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { getColor } from "../utils/colorFunc.js";
+import { getColor } from "../../utils/colorFunc.js";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchProblems, setSelectedProblem } from "../redux/problemSlice";
+import { fetchProblems, setSelectedProblem } from "../../redux/problemSlice.js";
 import { FiSearch, FiChevronUp, FiChevronDown } from "react-icons/fi"; // Make sure to install react-icons
+import "../../animations.css"
 
 const difficultyOrder = { Easy: 1, Medium: 2, Hard: 3 };
 
@@ -129,37 +130,7 @@ const Main = () => {
         </div>
       </div>
 
-      {/* Custom animations */}
-      <style>{`
-        @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(40px);}
-          to   { opacity: 1; transform: translateY(0);}
-        }
-        .animate-fadeInUp {
-          animation: fadeInUp 0.55s cubic-bezier(0.33,1,0.68,1) both;
-        }
-        @keyframes fadeInRow {
-          from { opacity: 0; transform: translateY(6px) scale(0.97);}
-          to   { opacity: 1; transform: translateY(0) scale(1);}
-        }
-        .animate-fadeInRow {
-          animation: fadeInRow 0.6s cubic-bezier(0.5,1.5,0.7,1) both;
-        }
-        @keyframes fadeIn {
-          from {opacity:0}
-          to {opacity:1}
-        }
-        .animate-fadeIn { animation: fadeIn 0.8s both; }
-        /* Custom scrollbar for modern look */
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 7px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: linear-gradient(180deg,#444 45%,#0a451a, #411333);
-          border-radius: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-      `}</style>
+
     </div>
   );
 };

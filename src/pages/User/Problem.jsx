@@ -1,8 +1,8 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import CodeEditor from "../components/problemPage/CodeEditor.jsx";
-import axios from "../utils/api";
-import { formatInput } from "../utils/inputFormat.js";
+import CodeEditor from "../../components/problemPage/CodeEditor.jsx";
+import axios from "../../utils/api.js";
+import { formatInput } from "../../utils/inputFormat.js";
 import { motion } from "framer-motion";
 
 const DEFAULT_SIGNATURES = {

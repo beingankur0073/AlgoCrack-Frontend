@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "../utils/api";
+import axios from "../../utils/api.js";
 import toast from "react-hot-toast";
-import backImg from "../assets/back.jpg";
+import backImg from "../../assets/back.jpg";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Loader2 } from "lucide-react";
-import { loginSchema, signUpSchema } from "../utils/inputValidation.js";
+import { loginSchema, signUpSchema } from "../../utils/inputValidation.js";
 
 import { useSelector, useDispatch } from "react-redux";
-import { loginThunk, registerThunk } from "../redux/authSlice";
+import { loginThunk, registerThunk } from "../../redux/authSlice.js";
 
 const AuthPage = () => {
   const [mode, setMode] = useState("login");
@@ -61,7 +61,7 @@ const AuthPage = () => {
       if (loginThunk.fulfilled.match(resultAction)) {
         const user = resultAction.payload?.user || data.username; // you can modify as needed
         toast.success(`Welcome back!`);
-        navigate("/");
+        navigate("/main");
       } else {
         // resultAction.payload contains the error message from thunk rejectWithValue
         setApiError(resultAction.payload?.message || "Invalid username or password");

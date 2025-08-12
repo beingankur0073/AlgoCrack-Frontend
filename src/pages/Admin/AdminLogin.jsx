@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "../utils/api";
+import axios from "../../utils/api";
 import toast from "react-hot-toast";
-import backImg from "../assets/back.jpg";
+import backImg from "../../assets/back.jpg";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");

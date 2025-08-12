@@ -42,7 +42,7 @@ const logoVariants = {
   const handleLogout = () => {
     toast.success("Logged out successfully!");
     dispatch(logoutAction());
-    navigate("/auth");
+    navigate("/");
   };
 
   const handleDeleteAccount = async () => {
