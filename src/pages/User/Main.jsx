@@ -3,7 +3,7 @@ import { getColor } from "../../utils/colorFunc.js";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchProblems, setSelectedProblem } from "../../redux/problemSlice.js";
-import { FiSearch, FiChevronUp, FiChevronDown } from "react-icons/fi"; // Make sure to install react-icons
+import { FiSearch, FiChevronUp, FiChevronDown } from "react-icons/fi"; 
 import "../../animations.css"
 
 const difficultyOrder = { Easy: 1, Medium: 2, Hard: 3 };
@@ -60,7 +60,7 @@ const Main = () => {
       <div className="w-full max-w-5xl">
         {/* Search Bar */}
         <div className="flex justify-between items-center mb-8 px-2">
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-green-400 via-blue-400 to-purple-500 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-green-400 via-neutral-400 to-red-500 bg-clip-text text-transparent">
             Problems
           </h1>
           <div className="relative group">
@@ -78,7 +78,7 @@ const Main = () => {
 
         {/* Animated Problem Table */}
         <div className="bg-gradient-to-br from-black via-zinc-950 to-green-900 rounded-xl shadow-2xl overflow-hidden animate-fadeInUp">
-          <div className="max-h-[70vh] overflow-y-auto custom-scrollbar">
+          <div className="max-h-[60vh] overflow-y-auto custom-scrollbar">
             <table className="w-full table-auto text-left">
               <thead className="bg-gradient-to-tr from-neutral-950 via-gray-950 to-rose-500 sticky top-0 z-10">
                 <tr>

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "../../utils/api";
 import toast from "react-hot-toast";
-import backImg from "../../assets/back.jpg";
 import { Info, Copy, Check } from "lucide-react";
 import {
   PieChart,

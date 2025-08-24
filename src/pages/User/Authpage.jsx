@@ -165,7 +165,7 @@ const AuthPage = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-blue-600/80 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition-all shadow-md hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed text-sm flex items-center gap-2"
+                  className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition-all shadow-md hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed text-sm flex items-center gap-2"
                 >
                   {loading ? <Loader2 className="animate-spin" size={18} /> : null}
                   {loading ? "Signing in..." : "Sign In"}
@@ -174,7 +174,7 @@ const AuthPage = () => {
             </form>
             <p className="text-sm text-center mt-6 text-gray-300">
               Don't have an account?{" "}
-              <button className="text-blue-400 hover:underline" onClick={() => setMode("signup")}>
+              <button className="text-green-400 hover:underline" onClick={() => setMode("signup")}>
                 Sign up
               </button>
             </p>
@@ -262,7 +262,7 @@ const AuthPage = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-blue-600/80 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition-all shadow-md hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed text-sm flex items-center gap-2"
+                  className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md transition-all shadow-md hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed text-sm flex items-center gap-2"
                 >
                   {loading && <Loader2 className="animate-spin" size={18} />}
                   {loading ? "Creating Account..." : "Sign Up"}
@@ -271,7 +271,7 @@ const AuthPage = () => {
             </form>
             <p className="text-sm text-center mt-6 text-gray-300">
               Already have an account?{" "}
-              <button className="text-blue-400 hover:underline" onClick={() => setMode("login")}>
+              <button className="text-green-400 hover:underline" onClick={() => setMode("login")}>
                 Log in
               </button>
             </p>

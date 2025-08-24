@@ -15,6 +15,25 @@ const languages = [
   { value: "java", label: "Java" },
 ];
 
+
+function shootConfetti() {
+  confetti({
+    particleCount: 120,
+    spread: 70,
+    origin: { x: 0.5, y: 0.7 }
+  });
+  confetti({
+    particleCount: 100,
+    spread: 100,
+    origin: { x: 0.2, y: 0.8 }
+  });
+  confetti({
+    particleCount: 100,
+    spread: 100,
+    origin: { x: 0.8, y: 0.8 }
+  });
+}
+
 const DEFAULT_SIGNATURES = {
   javascript: "// Write your code here (JS)",
   python: "# Write your code here (Python)",
@@ -97,7 +116,7 @@ const CodeEditor = ({ id, problem, language, setLanguage }) => {
             const formattedResults = testCaseResults.map((test, index) =>
               `Test Case ${index + 1}:\n  Input: ${formatInput(test.input)}\n  Expected: ${test.expectedOutput}\n  Output: ${test.actualOutput?.trim()}\n  Status: ${test.status}`
             );
-
+            shootConfetti();
             setOutput([`🎉 Accepted! All test cases passed.`, ...formattedResults]);
             return;
           }
