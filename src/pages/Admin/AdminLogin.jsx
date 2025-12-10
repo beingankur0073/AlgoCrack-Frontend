@@ -71,12 +71,17 @@ const AdminLogin = () => {
     />
   </div>
 
+  {/* Button Changes: 
+      - Removed 'w-full'
+      - Added 'w-40' (fixed width) or use 'w-1/2' (50% width)
+      - Added 'mx-auto block' to center it
+  */}
   <button
     type="submit"
     disabled={loading}
-    className="w-full bg-gradient-to-r from-yellow-400 via-emerald-500 to-yellow-400 hover:brightness-110 text-gray-900 font-semibold py-2 px-4 rounded-lg transition-all"
+    className="text-sm w-20 mx-auto block bg-gradient-to-r from-emerald-400 via-yellow-500 to-emerald-400 hover:brightness-110 text-gray-900 font-semibold py-2 px-4 rounded-lg transition-all"
   >
-    {loading ? "Logging in..." : "Login"}
+    {loading ? "Logging.." : "Login"}
   </button>
 </form>
 

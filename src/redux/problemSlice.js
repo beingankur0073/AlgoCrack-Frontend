@@ -1,13 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from '../utils/api';
 
-// Optional: Async thunk to fetch problems list
 export const fetchProblems = createAsyncThunk(
   'problem/fetchProblems',
-  async (_, thunkAPI) => {
+  async ({ page = 1, limit = 10 } = {}, thunkAPI) => {
     try {
-      const response = await axios.get('/problems');
-      return response.data.data;
+      const response = await axios.get(`/problems?page=${page}&limit=${limit}`);
+      return response.data.data; 
     } catch (error) {
       return thunkAPI.rejectWithValue(error?.response?.data || error.message);
     }
@@ -16,6 +15,9 @@ export const fetchProblems = createAsyncThunk(
 
 const initialState = {
   problems: [],
+  totalProblems: 0,
+  totalPages: 0,
+  currentPage: 1,
   selectedProblem: null,
   loading: false,
   error: null,
@@ -25,14 +27,13 @@ const problemSlice = createSlice({
   name: 'problem',
   initialState,
   reducers: {
-    setProblems(state, action) {
-      state.problems = action.payload;
+    // Action to clear problems (useful when searching or unmounting)
+    resetProblems(state) {
+      state.problems = [];
+      state.currentPage = 1;
     },
     setSelectedProblem(state, action) {
       state.selectedProblem = action.payload;
-    },
-    clearSelectedProblem(state) {
-      state.selectedProblem = null;
     },
   },
   extraReducers: (builder) => {
@@ -43,7 +44,22 @@ const problemSlice = createSlice({
       })
       .addCase(fetchProblems.fulfilled, (state, action) => {
         state.loading = false;
-        state.problems = action.payload;
+        
+        // --- KEY CHANGE FOR INFINITE SCROLL ---
+        if (action.payload.page === 1) {
+          // If page is 1, replace the data (initial load or refresh)
+          state.problems = action.payload.problems;
+        } else {
+          // If page > 1, APPEND the new problems to the existing list
+          // We use a Set to prevent potential duplicates just in case
+          const currentIds = new Set(state.problems.map(p => p._id));
+          const newUniqueProblems = action.payload.problems.filter(p => !currentIds.has(p._id));
+          state.problems = [...state.problems, ...newUniqueProblems];
+        }
+
+        state.totalProblems = action.payload.totalProblems;
+        state.currentPage = action.payload.page;
+        state.totalPages = Math.ceil(action.payload.totalProblems / action.payload.limit);
       })
       .addCase(fetchProblems.rejected, (state, action) => {
         state.loading = false;
@@ -52,6 +68,5 @@ const problemSlice = createSlice({
   },
 });
 
-export const { setProblems, setSelectedProblem, clearSelectedProblem } = problemSlice.actions;
-
+export const { setSelectedProblem, resetProblems } = problemSlice.actions;
 export default problemSlice.reducer;
