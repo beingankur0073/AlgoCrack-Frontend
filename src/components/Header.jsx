@@ -2,7 +2,9 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { FiMenu, FiX } from "react-icons/fi";
+
 import ChangePasswordDialog from "./ChangePasswordDialog.jsx";
 import HeaderNavbar from "./HeaderNavbar.jsx";
 import { logout as logoutAction } from "../redux/authSlice";
@@ -11,60 +13,44 @@ const Header = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth.auth);
+
   const [showDropdown, setShowDropdown] = useState(false);
   const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false);
+  const [showDrawer, setShowDrawer] = useState(false);
+
   const dropdownRef = useRef(null);
   const avatarUrl = auth?.user?.avatar || "https://i.pravatar.cc/40?img=3";
 
-  // Animation variants for the logo
+  /* ================= LOGO ANIMATION ================= */
   const logoVariants = {
     initial: {
       backgroundImage: "linear-gradient(to top left, #64748b, #15803d, #ffffff)",
-      opacity: 0.9,
     },
     animate: {
       backgroundImage: [
         "linear-gradient(to top left, #64748b, #15803d, #ffffff)",
-        "linear-gradient(to top left,  #030712 , #f43f5e,#fffff)",
+        "linear-gradient(to top left, #030712, #f43f5e, #ffffff)",
         "linear-gradient(to top left, #64748b, #15803d, #ffffff)",
       ],
-      opacity: [1, 0.9, 1],
-      transition: {
-        duration: 10,
-        repeat: Infinity,
-        ease: "easeInOut",
-      },
+      transition: { duration: 10, repeat: Infinity },
     },
   };
 
+  /* ================= ACTIONS ================= */
   const handleLogout = () => {
     toast.success("Logged out successfully!");
     dispatch(logoutAction());
     navigate("/");
   };
 
-  const handleDeleteAccount = async () => {
-    try {
-      await fetch("/users/delete", { method: "DELETE" });
-      toast.success("Account deleted successfully!");
-      dispatch(logoutAction());
-      navigate("/register");
-    } catch (err) {
-      toast.error("Failed to delete account");
-    }
-  };
+  const navItems = [
+    { label: "Problems", path: "/problems" },
+    { label: "MCQs", path: "/learn" },
+    { label: "Leaderboard", path: "/leaderboard" },
+    { label: "Profile", path: "/profile" },
+  ];
 
-  const handleChangePassword = () => {
-    setShowChangePasswordDialog(true);
-  };
-
-  const handleApplyAdmin = () => {
-    // You can redirect to a specific page or open a dialog here
-    toast.success("Admin application submitted! (Demo)");
-    setShowDropdown(false);
-    // navigate("/apply-admin"); // Uncomment if you have this route
-  };
-
+  /* ================= OUTSIDE CLICK ================= */
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -76,125 +62,125 @@ const Header = () => {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 bg-gradient-to-tr from-black via-stone-950 to-green-900 py-5 px-4 shadow-md mb-2">
-      <div className="max-w-7xl mx-auto flex items-center justify-end">
-        <div className="relative flex items-center justify-center">
-          {/* Radial blur effect layer */}
-          <motion.div
-            initial={{ opacity: 0.7, filter: "blur(40px)" }}
-            animate={{
-              opacity: [1, 0.7, 1],
-              filter: ["blur(40px)", "blur(60px)", "blur(40px)"],
-              background: [
-                "radial-gradient(circle, #64748b 0%, #15803d 45%, #fff 60%)",
-                "radial-gradient(circle,  #030712 0%, #f43f5e 45%,#fff 60%)",
-                "radial-gradient(circle, #64748b 0%, #15803d 45%, #fff 60%)",
-              ],
-            }}
-            transition={{
-              duration: 10,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140px] h-[70px] z-0 pointer-events-none"
-            style={{
-              borderRadius: "50%",
-              filter: "blur(40px)",
-            }}
-          />
-          {/* Animated AlgoCrack Text */}
+    <>
+      {/* ================= HEADER ================= */}
+      <header className="sticky top-0 z-40 bg-gradient-to-tr from-black via-stone-950 to-green-900 px-4 py-3 shadow-md">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+
+          {/* 🍔 BURGER ICON (MOBILE) */}
+          <button
+            onClick={() => setShowDrawer(true)}
+            className="md:hidden text-white"
+          >
+            <FiMenu size={26} />
+          </button>
+
+          {/* ================= LOGO ================= */}
           <motion.h1
-            className="relative sm:text-4xl leading-[1.3] bg-gradient-to-tl from-slate-500 via-green-700 to-white bg-clip-text text-transparent cursor-pointer z-10"
             onClick={() => navigate("/")}
             variants={logoVariants}
             initial="initial"
             animate="animate"
+            className="text-3xl sm:text-4xl font-bold bg-gradient-to-tl from-slate-500 via-green-700 to-white bg-clip-text text-transparent cursor-pointer"
           >
             AlgoCrack
           </motion.h1>
-        </div>
 
-        <HeaderNavbar />
+          {/* ================= DESKTOP NAV ================= */}
+          <div className="hidden md:flex items-center gap-6">
+            <HeaderNavbar />
+          </div>
 
-        <div className="relative " ref={dropdownRef}>
-          {/* NEW: Wrapped image in a div with 'group' class to handle hover state 
-              and added an absolute overlay div for the text.
-          */}
-          <div 
-            className="relative group w-11 h-11 cursor-pointer"
-            onClick={() => setShowDropdown(!showDropdown)}
-          >
+          {/* ================= PROFILE MENU ================= */}
+          <div className="relative" ref={dropdownRef}>
             <img
               src={avatarUrl}
               alt="Profile"
-              className="w-full h-full rounded-full border-2 border-blue-400 object-cover transition-opacity duration-300 group-hover:opacity-50"
+              onClick={() => setShowDropdown(!showDropdown)}
+              className="w-10 h-10 rounded-full border-2 border-blue-400 object-cover cursor-pointer"
             />
-            
-            {/* Hover Text Overlay */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-               <span className="text-[10px] font-bold text-white bg-black/60 px-1 py-0.5 rounded backdrop-blur-sm">
-                 Menu
-               </span>
-            </div>
+
+            {showDropdown && (
+              <div className="absolute right-0 mt-2 w-48 bg-neutral-950 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
+                <button
+                  onClick={() => navigate("/profile")}
+                  className="w-full px-4 py-2 text-left hover:bg-gray-800"
+                >
+                  Profile
+                </button>
+                <button
+                  onClick={() => setShowChangePasswordDialog(true)}
+                  className="w-full px-4 py-2 text-left hover:bg-gray-800"
+                >
+                  Change Password
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="w-full px-4 py-2 text-left text-red-400 hover:bg-gray-800"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
-
-          {showDropdown && (
-            <div className="bg-gradient-to-tr from-neutral-950 via-gray-950 to-rose-500 absolute right-0 mt-2 w-48 border border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
-              <button
-                onClick={() => {
-                  navigate("/profile");
-                  setShowDropdown(false);
-                }}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-800 text-sm text-white "
-              >
-                Profile
-              </button>
-
-              {/* NEW: Apply Admin Option */}
-              <button
-                onClick={handleApplyAdmin}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-800 text-sm text-yellow-400 font-medium "
-              >
-                Apply Admin
-              </button>
-
-              <button
-                onClick={() => {
-                  handleChangePassword();
-                  setShowDropdown(false);
-                }}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-800 text-sm text-white"
-              >
-                Change Password
-              </button>
-
-              <button
-                onClick={() => {
-                  handleDeleteAccount();
-                  setShowDropdown(false);
-                }}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-800 text-sm text-red-400"
-              >
-                Delete Account
-              </button>
-              
-              <hr className="border-gray-700" />
-              
-              <button
-                onClick={handleLogout}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-800 text-sm text-red-500 font-semibold"
-              >
-                Logout
-              </button>
-            </div>
-          )}
         </div>
-      </div>
+      </header>
+
+      {/* ================= MOBILE DRAWER ================= */}
+      <AnimatePresence>
+        {showDrawer && (
+          <>
+            {/* Overlay */}
+            <motion.div
+              className="fixed inset-0 bg-black/60 z-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowDrawer(false)}
+            />
+
+            {/* Drawer */}
+            <motion.div
+              className="fixed top-0 left-0 h-full w-[75%] max-w-xs bg-gradient-to-br from-black via-zinc-900 to-green-900 z-50 p-6"
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", stiffness: 260, damping: 25 }}
+            >
+              <div className="flex justify-between items-center mb-8">
+                <span className="text-xl font-bold text-white">Menu</span>
+                <FiX
+                  size={24}
+                  className="text-white cursor-pointer"
+                  onClick={() => setShowDrawer(false)}
+                />
+              </div>
+
+              <nav className="flex flex-col gap-5">
+                {navItems.map((item) => (
+                  <button
+                    key={item.label}
+                    onClick={() => {
+                      navigate(item.path);
+                      setShowDrawer(false);
+                    }}
+                    className="text-left text-lg text-gray-200 hover:text-green-400 transition"
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </nav>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {showChangePasswordDialog && (
-        <ChangePasswordDialog setShowChangePasswordDialog={setShowChangePasswordDialog} />
+        <ChangePasswordDialog
+          setShowChangePasswordDialog={setShowChangePasswordDialog}
+        />
       )}
-    </header>
+    </>
   );
 };
 
