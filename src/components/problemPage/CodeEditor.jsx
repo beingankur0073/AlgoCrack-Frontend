@@ -2,76 +2,51 @@ import Editor from "@monaco-editor/react";
 import axios from "../../utils/api.js";
 import { useEffect, useState } from "react";
 import confetti from "canvas-confetti";
-import { formatInput } from "../../utils/inputFormat.js";
-
 import { motion, AnimatePresence } from "framer-motion";
 import { useDispatch } from "react-redux";
 import { fetchProfileData } from "../../redux/profileSlice.js";
+import { FiLoader, FiCheckCircle, FiXCircle, FiAlertTriangle } from "react-icons/fi";
 
 const languages = [
-  { value: "javascript", label: "JavaScript" },
-  { value: "cpp", label: "C++" },
-  { value: "python", label: "Python" },
-  { value: "java", label: "Java" },
+  { value: "cpp", label: "C++ (GCC)" },
+  { value: "java", label: "Java (OpenJDK)" },
+  { value: "python", label: "Python 3" },
+  { value: "javascript", label: "JavaScript (Node.js)" },
 ];
 
-
 function shootConfetti() {
-  confetti({
-    particleCount: 120,
-    spread: 70,
-    origin: { x: 0.5, y: 0.7 }
-  });
-  confetti({
-    particleCount: 100,
-    spread: 100,
-    origin: { x: 0.2, y: 0.8 }
-  });
-  confetti({
-    particleCount: 100,
-    spread: 100,
-    origin: { x: 0.8, y: 0.8 }
-  });
+  confetti({ particleCount: 120, spread: 70, origin: { x: 0.5, y: 0.7 } });
+  confetti({ particleCount: 100, spread: 100, origin: { x: 0.2, y: 0.8 } });
+  confetti({ particleCount: 100, spread: 100, origin: { x: 0.8, y: 0.8 } });
 }
 
-const DEFAULT_SIGNATURES = {
-  javascript: "// Write your code here (JS)",
-  python: "# Write your code here (Python)",
-  cpp: "// Write your code here (C++)",
-  java: "// Write your code here (Java)",
-};
+const CodeEditor = ({ id, problem, language, setLanguage, code, setCode }) => {
+  const [outputStatus, setOutputStatus] = useState(null); // 'Running', 'Success', 'Error'
+  const [outputMessage, setOutputMessage] = useState(""); // Top level message
+  const [testResults, setTestResults] = useState([]); // Array of test case results
+  const [expandedTest, setExpandedTest] = useState(0); // Default open first failed case or first case
+  const dispatch = useDispatch();
 
-const CodeEditor = ({ id, problem, language, setLanguage }) => {
-  const [code, setCode] = useState("");
-  const [output, setOutput] = useState([]);
-  const [expandedTest, setExpandedTest] = useState(null);
-  const dispatch=useDispatch();
+  // Handle Code Execution
+  const handleRun = async () => {
+    setOutputStatus("Running");
+    setOutputMessage("Running test cases...");
+    setTestResults([]);
+    setExpandedTest(null);
 
-
-  useEffect(() => {
-    if (problem) {
-      const sig = DEFAULT_SIGNATURES[language];
-      setCode(sig);
-    }
-  }, [language, problem]);
-
-  // Run code and poll results logic...
-   const handleRun = async () => {
-    setOutput(["⏳ Running..."]);
     const accessToken = localStorage.getItem("accessToken");
 
     try {
-      const submitRes = await axios.post(
-        `/submissions/${id}`,
-        {
-          code,
-          language,
-          problemId: problem._id,
-        }
-      );
+      // 1. Submit Code
+      const submitRes = await axios.post(`/submissions/${id}`, {
+        code,
+        language,
+        problemId: problem._id,
+      });
 
       const submissionId = submitRes.data.data.submissionId;
 
+      // 2. Poll for Results
       const pollResult = async (retry = 0) => {
         try {
           const res = await axios.get(`/submissions/${submissionId}`, {
@@ -81,225 +56,195 @@ const CodeEditor = ({ id, problem, language, setLanguage }) => {
             },
           });
 
-          const {
-            status,
-            testCaseResults,
-            compileOutput,
-            stderr,
-          } = res.data.data;
+          const { status, testCaseResults, compileOutput, stderr } = res.data.data;
 
           if (status === "Pending" || status === "Processing") {
-            if (retry < 10) {
+            if (retry < 20) { // Poll for up to 30 seconds
               setTimeout(() => pollResult(retry + 1), 1500);
             } else {
-              setOutput(["⏳ Timeout: Judging took too long."]);
-              dispatch(fetchProfileData()); // dispatch here as well on timeout
+              setOutputStatus("Error");
+              setOutputMessage("Timeout: Server took too long to respond.");
             }
             return;
           }
 
-          // Dispatch profile refresh on all terminal statuses:
-          dispatch(fetchProfileData());
+          // --- Finished Processing ---
+          dispatch(fetchProfileData()); // Refresh profile stats
 
+          // Handle Global Errors (Compilation / Runtime)
           if (status === "Compilation Error") {
-            setOutput([`❌ Compilation Error:\n${compileOutput || "No compilation output."}`]);
+            setOutputStatus("Error");
+            setOutputMessage("Compilation Error");
+            setTestResults([{ isError: true, title: "Compiler Output", content: compileOutput }]);
             return;
           }
 
           if (status === "Runtime Error") {
-            setOutput([`❌ Runtime Error:\n${stderr || "No runtime error output."}`]);
+            setOutputStatus("Error");
+            setOutputMessage("Runtime Error");
+            setTestResults([{ isError: true, title: "Stderr", content: stderr }]);
             return;
           }
+
+          // Handle Test Case Results
+          setTestResults(testCaseResults || []);
 
           if (status === "Accepted") {
-            // confetti code...
-            const formattedResults = testCaseResults.map((test, index) =>
-              `Test Case ${index + 1}:\n  Input: ${formatInput(test.input)}\n  Expected: ${test.expectedOutput}\n  Output: ${test.actualOutput?.trim()}\n  Status: ${test.status}`
-            );
             shootConfetti();
-            setOutput([`🎉 Accepted! All test cases passed.`, ...formattedResults]);
-            return;
+            setOutputStatus("Success");
+            setOutputMessage("Accepted! All test cases passed.");
+            setExpandedTest(0); // Open first case
+          } else {
+            // Find first failed case to expand automatically
+            const firstFailedIndex = testCaseResults.findIndex(tc => tc.status !== "Passed");
+            setExpandedTest(firstFailedIndex !== -1 ? firstFailedIndex : 0);
+            
+            setOutputStatus("Error");
+            setOutputMessage(`Wrong Answer on Test Case ${firstFailedIndex + 1}`);
           }
 
-          if (Array.isArray(testCaseResults)) {
-            const failedCase = testCaseResults.find(tc => tc.status !== "Passed");
-            const formattedResults = testCaseResults.map((test, index) =>
-              `Test Case ${index + 1}:\n  Input: ${formatInput(test.input)}\n  Expected: ${test.expectedOutput}\n  Output: ${test.actualOutput?.trim()}\n  Status: ${test.status}`
-            );
-            if (failedCase) {
-              setOutput([
-                `❌ ${status} on a test case:`,
-                ...formattedResults,
-              ]);
-            } else {
-              setOutput([`❌ ${status}. No failed test case data available.`, ...formattedResults]);
-            }
-          } else {
-            setOutput([`❌ ${status}. Test case results not available.`]);
-          }
         } catch (err) {
-          setOutput([`❌ Error while fetching result: ${err.response?.data?.message || err.message || "Unknown error"}.`]);
-          dispatch(fetchProfileData()); // dispatch on error as well
+          setOutputStatus("Error");
+          setOutputMessage(`Error polling result: ${err.message}`);
         }
       };
 
       await pollResult();
+
     } catch (err) {
-      setOutput(`❌ Submission failed: ${err.response?.data?.message || err.message || "Unknown error"}.`);
-      dispatch(fetchProfileData()); // dispatch on submission failure
+      setOutputStatus("Error");
+      setOutputMessage(`Submission failed: ${err.response?.data?.message || err.message}`);
     }
   };
 
-  const hasOutput = Array.isArray(output)
-    ? output.length > 0 && output.some((item) => item && item.trim() !== "")
-    : output && output.toString().trim() !== "";
-
   return (
-    <div className="flex flex-col gap-4">
-      {/* Language Selector */}
-      <div className="flex items-center justify-between">
-        <label htmlFor="language" className="text-sm text-gray-400 font-medium">
-          Language:
-        </label>
-        <select
-          id="language"
-          className="bg-gray-800 text-white px-3 py-1 rounded-md focus:outline-none"
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-        >
-          {languages.map((lang) => (
-            <option key={lang.value} value={lang.value}>
-              {lang.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Editor */}
-      <Editor
-        height="400px"
-        language={language}
-        value={code}
-        theme="vs-dark"
-        onChange={(value) => {
-          if (typeof value === "string") {
-            setCode(value);
-          }
-        }}
-        onValidate={(markers) => {
-          if (markers.length > 0) console.warn("Validation errors:", markers);
-        }}
-        loading={<div className="text-white">Loading editor...</div>}
-      />
-
-      {/* Buttons */}
-      <div className="flex gap-4 justify-end">
+    <div className="flex flex-col gap-4 h-full">
+      {/* Toolbar */}
+      <div className="flex items-center justify-between bg-slate-900 p-2 rounded-t-lg border-b border-slate-700">
+        <div className="flex items-center gap-2">
+            <span className="text-sm text-slate-400 font-mono px-2">Language:</span>
+            <select
+            className="bg-slate-800 text-slate-200 px-3 py-1 rounded border border-slate-700 focus:border-amber-500 outline-none text-sm font-mono"
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            >
+            {languages.map((lang) => (
+                <option key={lang.value} value={lang.value}>
+                {lang.label}
+                </option>
+            ))}
+            </select>
+        </div>
+        
         <button
           onClick={handleRun}
-          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold"
+          disabled={outputStatus === "Running"}
+          className={`px-6 py-1.5 rounded font-semibold text-sm transition-all flex items-center gap-2
+            ${outputStatus === "Running" 
+                ? "bg-slate-700 text-slate-400 cursor-not-allowed" 
+                : "bg-green-600 hover:bg-green-500 text-white shadow-lg hover:shadow-green-500/20"
+            }`}
         >
-          Submit
+          {outputStatus === "Running" ? <FiLoader className="animate-spin" /> : "Run Code"}
         </button>
       </div>
 
-      {/* Output */}
-      {hasOutput && (
-        <div className="bg-gray-900 p-4 rounded-xl shadow-inner overflow-auto max-h-64">
-          <h4 className="font-bold mb-4 text-white text-lg">Output:</h4>
-          {Array.isArray(output) && output.length > 1 ? (
-            <>
-              {/* Summary */}
-              <div className="mb-4 text-white font-semibold">{output[0]}</div>
+      {/* Editor Area */}
+      <div className="flex-grow border border-slate-700 rounded-b-lg overflow-hidden shadow-2xl relative">
+          <Editor
+            height="100%"
+            language={language === 'cpp' ? 'cpp' : language} // Monaco uses 'cpp', 'java', 'python', 'javascript'
+            value={code}
+            theme="vs-dark"
+            onChange={(val) => setCode(val || "")}
+            options={{
+                minimap: { enabled: false },
+                fontSize: 14,
+                scrollBeyondLastLine: false,
+                automaticLayout: true,
+                padding: { top: 16, bottom: 16 }
+            }}
+            loading={<div className="bg-slate-900 h-full w-full flex items-center justify-center text-slate-400">Loading Editor...</div>}
+          />
+      </div>
 
-              {/* Test case buttons */}
-              <div className="flex gap-2 mb-4 overflow-x-auto">
-                {output.slice(1).map((_, index) => (
-                  <button
-                    key={index}
-                    className={`flex-shrink-0 px-4 py-2 rounded-t-lg font-semibold border-b-4 transition-all duration-200 ${
-                      expandedTest === index
-                        ? "bg-gray-800 text-emerald-300 border-emerald-400"
-                        : "bg-gray-800 text-gray-200 border-transparent hover:bg-gray-700"
-                    }`}
-                    onClick={() => setExpandedTest(expandedTest === index ? null : index)}
-                  >
-                    Test Case {index + 1}
-                  </button>
-                ))}
-              </div>
+      {/* Output Console */}
+      {outputStatus && (
+        <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-slate-900 rounded-lg border border-slate-700 overflow-hidden flex flex-col max-h-[300px]"
+        >
+            {/* Console Header */}
+            <div className={`p-3 border-b border-slate-700 flex items-center gap-2 font-semibold
+                ${outputStatus === "Success" ? "text-green-400 bg-green-900/20" : 
+                  outputStatus === "Error" ? "text-red-400 bg-red-900/20" : "text-amber-400 bg-amber-900/20"}`}
+            >
+                {outputStatus === "Running" && <FiLoader className="animate-spin" />}
+                {outputStatus === "Success" && <FiCheckCircle />}
+                {outputStatus === "Error" && <FiXCircle />}
+                {outputMessage}
+            </div>
 
-              {/* Test case details */}
-              <AnimatePresence initial={false}>
-                {expandedTest !== null && (() => {
-                  const test = output[expandedTest + 1];
-                  const inputMatch = test.match(/Input:\s*(.*)/);
-                  const expectedMatch = test.match(/Expected:\s*(.*)/);
-                  const outputMatch = test.match(/Output:\s*(.*)/);
-                  const statusMatch = test.match(/Status:\s*(.*)/);
-
-                  const rawInput = inputMatch ? inputMatch[1] : "";
-                  let input = "";
-                  try {
-                    const parsedInput = JSON.parse(rawInput);
-                    if (typeof parsedInput === "object" && parsedInput !== null) {
-                      input = Object.values(parsedInput).join(" ");
-                    } else {
-                      input = parsedInput;
-                    }
-                  } catch {
-                    input = rawInput;
-                  }
-
-                  const expectedOutput = expectedMatch ? expectedMatch[1] : "";
-                  const actualOutput = outputMatch ? outputMatch[1] : "";
-                  const status = statusMatch ? statusMatch[1] : "";
-
-                  return (
-                    <motion.div
-                      key={expandedTest}
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className={`rounded-b-lg p-4 shadow border-t-2 w-full mt-0 ${
-                        status === "Passed"
-                          ? "border-green-500 bg-gray-800/80"
-                          : "border-red-500 bg-gray-800/80"
-                      }`}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-semibold text-gray-300">Test Case {expandedTest + 1}</span>
-                        <span
-                          className={`font-bold px-2 py-1 rounded ${
-                            status === "Passed" ? "bg-green-600 text-white" : "bg-red-600 text-white"
-                          }`}
+            {/* Test Case Tabs */}
+            {testResults.length > 0 && !testResults[0].isError && (
+                <div className="flex overflow-x-auto border-b border-slate-700 bg-slate-950/50">
+                    {testResults.map((result, idx) => (
+                        <button
+                            key={idx}
+                            onClick={() => setExpandedTest(idx)}
+                            className={`px-4 py-2 text-xs font-mono border-r border-slate-800 transition-colors flex items-center gap-2
+                                ${expandedTest === idx ? "bg-slate-800 text-white border-b-2 border-b-amber-500" : "text-slate-400 hover:bg-slate-800/50"}
+                            `}
                         >
-                          {status}
-                        </span>
-                      </div>
-                      <div className="mb-1">
-                        <span className="text-blue-300 font-semibold">Input:</span>{" "}
-                        <span className="text-white">{input}</span>
-                      </div>
-                      <div className="mb-1">
-                        <span className="text-yellow-300 font-semibold">Expected:</span>{" "}
-                        <span className="text-white">{expectedOutput}</span>
-                      </div>
-                      <div>
-                        <span className="text-green-300 font-semibold">Output:</span>{" "}
-                        <span className="text-white">{actualOutput}</span>
-                      </div>
-                    </motion.div>
-                  );
-                })()}
-              </AnimatePresence>
-            </>
-          ) : (
-            <pre className="whitespace-pre-wrap break-words bg-gray-800 rounded-lg p-4 text-green-400 font-mono">
-              {output}
-            </pre>
-          )}
-        </div>
+                            Case {idx + 1}
+                            {result.status === "Passed" 
+                                ? <span className="w-2 h-2 rounded-full bg-green-500"></span> 
+                                : <span className="w-2 h-2 rounded-full bg-red-500"></span>}
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {/* Test Case Details / Compilation Output */}
+            <div className="p-4 overflow-y-auto custom-scrollbar font-mono text-sm bg-slate-950">
+                {/* Scenario A: Compilation Error or Global Error */}
+                {testResults.length > 0 && testResults[0].isError && (
+                    <pre className="text-red-300 whitespace-pre-wrap">{testResults[0].content}</pre>
+                )}
+
+                {/* Scenario B: Test Case Detail */}
+                {testResults.length > 0 && !testResults[0].isError && expandedTest !== null && (
+                    <div className="space-y-3 animate-fadeIn">
+                        <div>
+                            <span className="text-slate-500 text-xs uppercase tracking-wider block mb-1">Input</span>
+                            <div className="bg-slate-900 p-2 rounded border border-slate-800 text-slate-300 whitespace-pre-wrap">
+                                {testResults[expandedTest].input}
+                            </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <span className="text-slate-500 text-xs uppercase tracking-wider block mb-1">Expected Output</span>
+                                <div className="bg-slate-900 p-2 rounded border border-slate-800 text-slate-300 whitespace-pre-wrap">
+                                    {testResults[expandedTest].expectedOutput}
+                                </div>
+                            </div>
+                            <div>
+                                <span className="text-slate-500 text-xs uppercase tracking-wider block mb-1">Your Output</span>
+                                <div className={`p-2 rounded border whitespace-pre-wrap
+                                    ${testResults[expandedTest].status === "Passed" 
+                                        ? "bg-green-900/10 border-green-900/30 text-green-300" 
+                                        : "bg-red-900/10 border-red-900/30 text-red-300"}`}
+                                >
+                                    {testResults[expandedTest].actualOutput || <span className="text-slate-600 italic">No output</span>}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </motion.div>
       )}
     </div>
   );
